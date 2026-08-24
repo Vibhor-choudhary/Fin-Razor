@@ -1,0 +1,48 @@
+.tracer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.tracer-controls {
+  margin-bottom: 2rem;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+}
+
+.evidence-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  background: var(--bg-card);
+  border-left: 4px solid var(--accent);
+}
+
+.strip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.strip-item .label {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+
+.strip-item .value {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.reconciliation {
+  margin-top: 2rem;
+  background: var(--bg-card);
+}
+
+.recon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  align-items: center;
+}

@@ -1,6 +1,8 @@
 :root {
   --bg: #090a0f;
   --bg-surface: #12141c;
+  --bg-card: #10121a;
+  --bg-hover: #1a1d28;
   --fg: #f4f0e6;
   --fg-muted: #a3a6ad;
   --accent: #20c997;
@@ -9,8 +11,11 @@
   --error: #ff6b6b;
   --error-muted: rgba(255, 107, 107, 0.2);
   --warning: #fcc419;
+  --gold: #d4af37;
+  --simulated: #8b5cf6;
 
-  --font-sans: "Georgia", "Times New Roman", serif; /* Editorial display */
+  --font-sans: "Georgia", "Times New Roman", serif;
+  --font-serif: "Georgia", "Times New Roman", serif;
   --font-mono: "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", monospace;
 }
 
@@ -54,6 +59,10 @@ a {
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 .nav-item {
@@ -117,6 +126,30 @@ a {
 .chip.error {
   border-color: var(--error);
   color: var(--error);
+}
+
+.chip.provenance-verified {
+  background: rgba(32, 201, 151, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.chip.provenance-simulated {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--simulated);
+  color: #c4b5fd;
+}
+
+.chip.provenance-abstained {
+  background: rgba(255, 107, 107, 0.08);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.chip.provenance-enforced {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--gold);
+  color: var(--gold);
 }
 
 /* Metric Display */

@@ -1,0 +1,170 @@
+.arch-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.arch-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.arch-flow {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.arch-step-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+}
+
+.arch-node {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.arch-node:hover {
+  transform: translateY(-2px);
+  border-color: var(--fg-muted);
+}
+
+.arch-node.selected {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.arch-node.boundary-real {
+  border-left: 4px solid var(--accent);
+}
+
+.arch-node.boundary-simulated {
+  border-left: 4px solid var(--simulated);
+}
+
+.node-icon {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.arch-node.selected .node-icon {
+  color: var(--accent);
+}
+
+.node-title {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.node-subtitle {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.arch-arrow {
+  color: var(--fg-muted);
+  margin-top: 1.5rem;
+  opacity: 0.5;
+  transform: rotate(90deg);
+}
+
+.arch-edge-badge {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  z-index: 10;
+}
+
+.arch-drawer {
+  flex: 1;
+  min-width: 300px;
+  position: sticky;
+  top: 2rem;
+}
+
+.drawer-section {
+  margin-bottom: 1.5rem;
+}
+
+.drawer-section h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+.drawer-section p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.drawer-note {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(212, 175, 55, 0.05);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--fg);
+  font-style: italic;
+}
+
+.drawer-links {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media (min-width: 1000px) {
+  .arch-flow {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .arch-step-wrapper {
+    flex-direction: row;
+    width: auto;
+  }
+  .arch-arrow {
+    margin-top: 0;
+    margin-left: 1.5rem;
+    transform: rotate(0deg);
+  }
+  .arch-edge-badge {
+    top: 50%;
+    left: calc(100% + 0.25rem);
+    transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 900px) {
+  .arch-layout {
+    flex-direction: column;
+  }
+  .arch-drawer {
+    position: static;
+    width: 100%;
+  }
+}

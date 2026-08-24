@@ -107,5 +107,24 @@ export const api = {
     const res = await fetch(`${API_URL}/api/logs${qs}`);
     if (!res.ok) throw new Error('Failed to fetch logs');
     return res.json();
-  }
+  },
+
+  // Paginates through all sessions since backend caps limit at 100
+  getAllSessions: async (filterParams?: Record<string, string>): Promise<Session[]> => {
+    const PAGE = 100;
+    let offset = 0;
+    let all: Session[] = [];
+    while (true) {
+      const params = { ...filterParams, limit: String(PAGE), offset: String(offset) };
+      const qs = '?' + new URLSearchParams(params).toString();
+      const res = await fetch(`${API_URL}/api/sessions${qs}`);
+      if (!res.ok) break;
+      const data = await res.json();
+      const page: Session[] = data.sessions ?? [];
+      all = all.concat(page);
+      if (page.length < PAGE) break;
+      offset += PAGE;
+    }
+    return all;
+  },
 };

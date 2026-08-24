@@ -1,0 +1,130 @@
+.ei-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.default-deny-callout {
+  padding: 1rem;
+  background: rgba(212, 175, 55, 0.05);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  margin-bottom: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--fg);
+}
+
+.ei-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.ei-table-container {
+  flex: 2;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.ei-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ei-table th, .ei-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.ei-table th {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  background: var(--bg-card);
+}
+
+.ei-table tr.clickable {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ei-table tr.clickable:hover {
+  background: var(--bg-hover);
+}
+
+.ei-table tr.selected {
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 3px solid var(--accent);
+}
+
+.ei-table tr.unclickable {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ei-detail-panel {
+  flex: 1;
+  min-width: 300px;
+  position: sticky;
+  top: 2rem;
+}
+
+.ei-empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--fg-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.ei-detail-content h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.detail-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.detail-section h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  font-family: var(--font-mono);
+}
+
+.detail-section p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.dist-bars {
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+@media (max-width: 900px) {
+  .ei-layout {
+    flex-direction: column;
+  }
+  .ei-detail-panel {
+    position: static;
+    width: 100%;
+  }
+}

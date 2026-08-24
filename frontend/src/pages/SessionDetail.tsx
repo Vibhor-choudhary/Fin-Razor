@@ -34,9 +34,16 @@ export function SessionDetail() {
   
   return (
     <div>
-      <Link to="/recovery-queue" className="btn" style={{ marginBottom: '2rem', display: 'inline-block' }}>
-        ← Back to Queue
-      </Link>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+        <Link to="/recovery-queue" className="btn">
+          ← Back to Queue
+        </Link>
+        {intervention && (
+          <Link to={`/replay/${session.id}`} className="btn" style={{ background: 'var(--accent)', color: 'var(--bg)' }}>
+            ▶ View Recovery Replay
+          </Link>
+        )}
+      </div>
 
       <div className="header" style={{ marginBottom: '1.5rem' }}>
         <div>

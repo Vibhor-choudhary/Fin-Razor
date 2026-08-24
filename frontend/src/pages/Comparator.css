@@ -1,0 +1,93 @@
+.comparator-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.compare-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.select-col {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.select-col label {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+
+.select-col select {
+  width: 100%;
+}
+
+.swap-btn {
+  padding: 0.5rem;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.comp-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.comp-col h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-row {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-row:last-child {
+  border-bottom: none;
+}
+
+.comp-label {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  margin-bottom: 0.25rem;
+}
+
+.comp-val {
+  font-size: 0.95rem;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.comp-val.success {
+  color: var(--accent);
+}
+
+.comp-val.error {
+  color: var(--error);
+}
+
+@media (max-width: 900px) {
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type Metrics, type Session } from '../lib/api';
+import { Funnel } from '../components/Funnel';
 
 export function Overview() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -87,6 +88,8 @@ export function Overview() {
         </div>
       </div>
 
+      <Funnel />
+
       <h3>Recent At-Risk Sessions</h3>
       <div className="panel" style={{ padding: 0 }}>
         {sessions.length === 0 ? (
@@ -112,7 +115,12 @@ export function Overview() {
                     </span>
                   </td>
                   <td>
-                    <Link to={`/sessions/${s.id}`} className="btn">View</Link>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <Link to={`/sessions/${s.id}`} className="btn">View</Link>
+                      {s.intervention_type && (
+                        <Link to={`/replay/${s.id}`} className="btn" style={{ background: 'var(--accent)', color: 'var(--bg)' }}>▶ Replay</Link>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
