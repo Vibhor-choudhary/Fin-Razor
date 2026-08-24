@@ -89,21 +89,22 @@ const NODES: NodeData[] = [
     safety: 'No POST/PUT endpoints. Data is strictly read-only.',
     links: [
       { label: 'Overview', to: '/' },
-      { label: 'Recovery Replay', to: '/recovery-queue' } // Replay is per-session, link to queue
+      { label: 'Recovery Replay', to: '/recovery-queue' }
     ]
   }
 ];
 
 export function Architecture() {
   const [selectedId, setSelectedId] = useState<string>('hyperswitch');
-  const selectedNode = NODES.find(n => n.id === selectedId);
+  const selectedIndex = NODES.findIndex(n => n.id === selectedId);
+  const selectedNode = NODES[selectedIndex >= 0 ? selectedIndex : 0];
 
   return (
     <div className="arch-container slide-up">
       <div className="header" style={{ marginBottom: '2rem' }}>
         <h1 className="title">Architecture Explorer</h1>
         <div className="methodology">
-          HISTORICAL SANDBOX ANALYSIS — System flow and safety boundaries.
+          HISTORICAL SANDBOX ANALYSIS — System flow and safety boundaries. Click nodes to inspect connectors and data paths.
         </div>
       </div>
 
@@ -112,6 +113,7 @@ export function Architecture() {
           {NODES.map((node, i) => {
             const Icon = node.icon;
             const isSelected = selectedId === node.id;
+            const isPathActive = selectedIndex === i;
             return (
               <div key={node.id} className="arch-step-wrapper">
                 <button 
@@ -133,7 +135,10 @@ export function Architecture() {
                 )}
                 
                 {i < NODES.length - 1 && (
-                  <ArrowRight className="arch-arrow" size={20} />
+                  <ArrowRight
+                    className={`arch-arrow ${isPathActive ? 'active-path' : ''}`}
+                    size={20}
+                  />
                 )}
               </div>
             );
@@ -141,7 +146,7 @@ export function Architecture() {
         </div>
 
         <div className="arch-drawer panel">
-          {selectedNode ? (
+          {selectedNode && (
             <div className="drawer-content slide-up" key={selectedNode.id}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                 <selectedNode.icon size={24} style={{ color: 'var(--accent)' }} />
@@ -164,10 +169,10 @@ export function Architecture() {
                 <p>{selectedNode.stored}</p>
               </div>
               <div className="drawer-section">
-                <h4>Safety Boundary</h4>
-                <p className="mono" style={{ color: 'var(--gold)' }}>{selectedNode.safety}</p>
+                <h4>Safety Invariant</h4>
+                <p>{selectedNode.safety}</p>
               </div>
-              
+
               {selectedNode.note && (
                 <div className="drawer-note">
                   {selectedNode.note}
@@ -177,14 +182,14 @@ export function Architecture() {
               {selectedNode.links.length > 0 && (
                 <div className="drawer-links">
                   {selectedNode.links.map(l => (
-                    <Link key={l.to} to={l.to} className="btn" style={{ background: 'var(--bg-hover)' }}>
+                    <Link key={l.to} to={l.to} className="btn">
                       View {l.label}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

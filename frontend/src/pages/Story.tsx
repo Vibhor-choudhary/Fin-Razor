@@ -6,18 +6,14 @@ import {
   LayoutDashboard,
   ShieldCheck,
   Workflow,
-  ScrollText,
   ArrowRight,
   Menu,
   X,
   Database,
   Cpu,
-  Layers,
   Activity,
   AlertTriangle,
-  Scale,
-  Navigation,
-  BookOpen
+  ChevronDown
 } from 'lucide-react';
 import './Story.css';
 
@@ -41,7 +37,13 @@ export function Story() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  
+  // Interactive Component States
+  const [selectedHeroNode, setSelectedHeroNode] = useState<number>(2); // Default to DC_08
   const [selectedDecisionStep, setSelectedDecisionStep] = useState<number>(2); // Default to ENFORCE
+  const [selectedOrbitToken, setSelectedOrbitToken] = useState<number>(2); // Default to Sandbox Verified
+  const [expandedMetricCol, setExpandedMetricCol] = useState<number | null>(null); // Inline expand
+  const [selectedAbstainStep, setSelectedAbstainStep] = useState<number>(1); // Default to Policy Check
   const [selectedPolicyRule, setSelectedPolicyRule] = useState<number | null>(null);
   const [selectedJourneyStage, setSelectedJourneyStage] = useState<number>(2); // Default to DC_08
   const [footerInView, setFooterInView] = useState<boolean>(false);
@@ -135,18 +137,90 @@ export function Story() {
     return `${(n * 100).toFixed(1)}%`;
   };
 
-  // 5-Stage Decision Engine Specs
+  // 1. Clickable Hero Recovery Vector Flow Nodes
+  const heroVectorNodes = [
+    {
+      id: 0,
+      title: 'CHECKOUT EVENT',
+      short: '01 EVENT',
+      observed: 'Active customer session initiated',
+      next: 'Payment gateway submission',
+      stored: 'Session ID & cart value recorded',
+      evidence: 'A checkout session entered the evaluation set.',
+      provenance: 'SANDBOX SIMULATION',
+      badgeClass: 'chip-neutral',
+      cx: 45,
+      cy: 85
+    },
+    {
+      id: 1,
+      title: 'PAYMENT ATTEMPT',
+      short: '02 ATTEMPT',
+      observed: 'Credentials submitted to gateway',
+      next: 'Process via Hyperswitch rail',
+      stored: 'Attempt timestamp & routing info',
+      evidence: 'Hyperswitch payment attempt created in the sandbox.',
+      provenance: 'REAL RAILS',
+      badgeClass: 'chip-neutral',
+      cx: 135,
+      cy: 85
+    },
+    {
+      id: 2,
+      title: 'DC_08 · CARD DECLINED',
+      short: '03 DECLINE',
+      observed: 'Error code DC_08 returned by bank',
+      next: 'Evaluate recovery eligibility',
+      stored: 'Decline code & error payload',
+      evidence: 'Payment status failed. Error code DC_08: Payment declined: Card declined.',
+      provenance: 'RISK SIGNAL',
+      badgeClass: 'chip-red',
+      cx: 230,
+      cy: 85,
+      isRisk: true
+    },
+    {
+      id: 3,
+      title: 'POLICY GATE',
+      short: '04 POLICY',
+      observed: 'LLM proposal checked against 8 rules',
+      next: 'Allow single retry or abstain',
+      stored: 'Guardrail evaluation decision log',
+      evidence: 'The stored proposal is checked against deterministic rules.',
+      provenance: 'CODE ENFORCED',
+      badgeClass: 'chip-gold',
+      cx: 325,
+      cy: 85,
+      isPolicy: true
+    },
+    {
+      id: 4,
+      title: 'AUDIT RECORD',
+      short: '05 AUDIT',
+      observed: 'Terminal state reached (₹11,571 verified)',
+      next: 'None · Session locked',
+      stored: 'Final outcome & audit hash',
+      evidence: 'Decision and payment response retained for review.',
+      provenance: 'SANDBOX VERIFIED',
+      badgeClass: 'chip-green',
+      cx: 415,
+      cy: 85,
+      isSuccess: true
+    }
+  ];
+
+  // 2. 5-Stage Decision Engine Specs
   const decisionSteps = [
     {
       stage: '01',
       title: 'OBSERVE',
       subtitle: 'Event evidence received',
       badge: 'SANDBOX SIMULATION',
-      badgeClass: 'badge-neutral',
+      badgeClass: 'chip-neutral',
       height: '40%',
       marker: '○',
-      summary: 'Captures terminal checkout event telemetry without blocking the payment stream.',
-      detail: 'Freezes environmental context: cart amount, error code (DC_08), and state snapshot. Does not execute payment retries or escalate automatically.',
+      summary: 'Payment and checkout evidence enters the system.',
+      detail: 'Captures terminal checkout event telemetry without blocking the payment stream. Freezes environmental context: cart amount, error code (DC_08), and state snapshot.',
       invariant: 'Event store captures immutable snapshot before reasoning commences.'
     },
     {
@@ -154,24 +228,24 @@ export function Story() {
       title: 'PROPOSE',
       subtitle: 'LLM recommendation',
       badge: 'SIMULATED OUTCOME',
-      badgeClass: 'badge-cyan',
+      badgeClass: 'chip-cyan',
       height: '60%',
       marker: '◇',
-      summary: 'Upsonic LLM agent evaluates failure reason and proposes an advisory action.',
+      summary: 'The LLM recommends an action; it does not execute one.',
       detail: 'Outputs structured proposal: action (retry, nudge, none), target channel, and confidence score. The proposal is strictly advisory and cannot execute directly.',
       invariant: 'LLM output is quarantined as an unprivileged recommendation.'
     },
     {
       stage: '03',
       title: 'ENFORCE',
-      subtitle: 'Code checks policy',
+      subtitle: 'Deterministic policy',
       badge: 'POLICY v1 · CODE ENFORCED',
-      badgeClass: 'badge-gold',
+      badgeClass: 'chip-gold',
       height: '96%',
       marker: '⬡',
       isDominant: true,
-      summary: '8 deterministic code guardrails evaluate proposal against hard allowlists.',
-      detail: 'Evaluates retry allowlist (DC_08 only), confidence threshold (≥ 0.60), freshness window (60s), amount immutability, and one-action ceiling. Blocks invalid actions immediately.',
+      summary: 'Deterministic code checks allowlists, confidence, freshness, amount, completed-session exclusion, and action count.',
+      detail: '8 deterministic code guardrails evaluate proposal against hard allowlists. Evaluates retry allowlist (DC_08 only), confidence threshold (≥ 0.60), freshness window (60s), amount immutability, and one-action ceiling. Blocks invalid actions immediately.',
       invariant: 'Policy engine is pure deterministic Python code with zero runtime mutation.'
     },
     {
@@ -179,10 +253,10 @@ export function Story() {
       title: 'ACT ONCE',
       subtitle: 'One bounded action',
       badge: 'SANDBOX VERIFIED',
-      badgeClass: 'badge-green',
+      badgeClass: 'chip-green',
       height: '75%',
       marker: '◇',
-      summary: 'Executes at most one permitted action over authenticated sandbox payment rails.',
+      summary: 'At most one permitted retry or one modeled nudge is recorded.',
       detail: 'Dispatches retry request to Hyperswitch sandbox API or modeled customer nudge. Captures real terminal payment state (succeeded or failed). Never modifies cart amount.',
       invariant: 'Single-action bound guaranteed: session transitions to terminal evaluated state.'
     },
@@ -191,12 +265,138 @@ export function Story() {
       title: 'AUDIT',
       subtitle: 'Outcome retained',
       badge: 'HISTORICAL REPLAY · READ ONLY',
-      badgeClass: 'badge-neutral',
+      badgeClass: 'chip-neutral',
       height: '50%',
       marker: '○',
-      summary: 'Records raw gateway response and full reasoning path in event store.',
+      summary: 'The outcome and available raw response evidence are retained for review.',
       detail: 'Stores payload hashes, guardrail decision log, model confidence, and final outcome. Powers Recovery Replay, Guardrail Tracer, and Recovery Ledger.',
       invariant: 'Audit records retained for review: every recovery decision can be replayed step-by-step.'
+    }
+  ];
+
+  // 3. Orbit Interactive Tokens
+  const orbitTokens = [
+    {
+      id: 0,
+      code: 'DC_08',
+      label: 'Risk Signal',
+      tag: 'ERROR TRIGGER',
+      provenance: 'RISK SIGNAL',
+      chipClass: 'chip-red',
+      amount: null,
+      explanation: 'DC_08 (Card declined) is the only error code permitted for automated sandbox payment retries.'
+    },
+    {
+      id: 1,
+      code: 'ONE ACTION',
+      label: 'Ceiling Bound',
+      tag: 'POLICY INVARIANT',
+      provenance: 'CODE ENFORCED',
+      chipClass: 'chip-gold',
+      amount: null,
+      explanation: 'Exactly one bounded recovery action permitted per session, preventing cascading dispatches.'
+    },
+    {
+      id: 2,
+      code: 'SANDBOX VERIFIED',
+      label: 'Verified Recovery',
+      tag: 'REAL RAILS',
+      provenance: 'SANDBOX VERIFIED',
+      chipClass: 'chip-green',
+      amount: metrics?.verified_sandbox_recovered_amount,
+      explanation: 'Successful retry attempts executed directly against authenticated Hyperswitch sandbox payment rails.'
+    },
+    {
+      id: 3,
+      code: 'AUDIT LOG',
+      label: 'Retained Evidence',
+      tag: 'AUDIT TRAIL',
+      provenance: 'HISTORICAL REPLAY',
+      chipClass: 'chip-neutral',
+      amount: metrics?.total_modeled_recovered_amount,
+      explanation: 'Every recovery decision, model confidence score, and raw gateway response is persisted for review.'
+    }
+  ];
+
+  // 4. Click-to-Expand Metric Columns
+  const metricEvidenceColumns = [
+    {
+      id: 0,
+      tag: 'RECOVERY LIFT',
+      value: fmtLift(metrics?.recovery_lift),
+      valClass: 'text-gold',
+      shortDesc: 'Difference between recorded treatment and control conversion rates.',
+      expandedTitle: 'Conversion Lift Methodology',
+      expandedDetail: 'Calculated as (Agent Conversion 60.8% - Baseline Conversion 55.8%) across the 103 evaluation sessions. Represents net conversion delta in percentage points.',
+      provenance: 'EVALUATION METRIC'
+    },
+    {
+      id: 1,
+      tag: 'AGENT CONVERSION',
+      value: fmtPct(metrics?.agent_conversion),
+      valClass: '',
+      shortDesc: `Recorded treatment cohort conversion. Baseline: ${fmtPct(metrics?.baseline_conversion)}.`,
+      expandedTitle: 'Cohort Conversion Breakdown',
+      expandedDetail: '60.8% of checkout sessions in the treatment group converted (either through self-recovery, sandbox retry, or simulated nudge), compared to 55.8% in the baseline cohort.',
+      provenance: 'EVALUATION METRIC'
+    },
+    {
+      id: 2,
+      tag: 'SANDBOX VERIFIED',
+      chipTag: 'REAL RAILS',
+      chipClass: 'chip-green',
+      value: fmtCurrency(metrics?.verified_sandbox_recovered_amount),
+      valClass: 'text-green',
+      shortDesc: 'Successful sandbox retry evidence only. Real terminal status succeeded.',
+      expandedTitle: 'Verified Sandbox Payment Rails',
+      expandedDetail: 'Represents ₹11,571.49 recovered across verified Hyperswitch payment intents. Every single retry was dispatched to the real sandbox gateway API and confirmed via webhook.',
+      provenance: 'SANDBOX VERIFIED'
+    },
+    {
+      id: 3,
+      tag: 'POLICY EVIDENCE',
+      chipTag: 'PARTIAL',
+      chipClass: 'chip-gold',
+      value: metrics?.abstentions != null ? `${metrics.abstentions} abstained` : '—',
+      valClass: '',
+      shortDesc: 'Policy checks are partial where stored evidence cannot conclusively verify an invariant.',
+      expandedTitle: 'Safety Abstention Breakdown',
+      expandedDetail: '42 sessions triggered safe abstention (40.8% abstain rate) due to non-retryable errors, low model confidence (< 0.60), or expired freshness (> 60s). Zero unsafe secondary retries were permitted.',
+      provenance: 'CODE ENFORCED'
+    }
+  ];
+
+  // 5. Interactive Abstention Gate
+  const abstentionSteps = [
+    {
+      id: 0,
+      title: '1. LLM PROPOSAL',
+      subtitle: 'Advisory recommendation',
+      tag: 'UNPRIVILEGED INPUT',
+      chipClass: 'chip-cyan',
+      badge: 'SIMULATED OUTCOME',
+      detail: 'Agent evaluates DC_08_EXPIRED session and suggests a payment retry based on cart value (₹2,499.00) and card decline history. The proposal carries confidence 0.82.',
+      storedEvidence: 'Proposal payload: { action: "retry", confidence: 0.82, reason: "card_declined_retryable" }'
+    },
+    {
+      id: 1,
+      title: '2. POLICY EVALUATION',
+      subtitle: 'Rule #5 Freshness check',
+      tag: 'BLOCKED BY RULE 05',
+      chipClass: 'chip-gold',
+      badge: 'POLICY v1 · CODE ENFORCED',
+      detail: 'Deterministic guardrail inspects session timestamp: Abandonment elapsed time is 84 seconds (> 60s window). Policy Rule #5 triggers immediate hard block.',
+      storedEvidence: 'Guardrail check: FRESHNESS_WINDOW (84s > 60s) -> VIOLATION_PREVENTED -> Status: ABSTAINED'
+    },
+    {
+      id: 2,
+      title: '3. FINAL OUTCOME',
+      subtitle: 'Safe default-deny state',
+      tag: 'NO ACTION DISPATCHED',
+      chipClass: 'chip-neutral',
+      badge: 'GUARDRAIL ABSTAINED',
+      detail: 'Zero network calls dispatched to payment rails. Session marked as terminal abstained in the event store. Double-billing and customer spam structurally prevented.',
+      storedEvidence: 'Audit log entry: { session_id: "DC_08_EXPIRED", outcome: "none", guardrail_result: "blocked_freshness" }'
     }
   ];
 
@@ -316,9 +516,9 @@ export function Story() {
                 onClick={() => scrollToSection(sec.id)}
                 aria-current={isActive ? 'true' : undefined}
               >
+                <div className="doc-node-progress-mark" aria-hidden="true" />
                 <span className="doc-node-num mono">{sec.num}</span>
                 <span className="doc-node-label">{sec.label}</span>
-                {isActive && <div className="doc-active-indicator" aria-hidden="true" />}
               </button>
             );
           })}
@@ -398,7 +598,7 @@ export function Story() {
           ========================================================================= */}
       <main className="story-wireframe-canvas">
         {/* -----------------------------------------------------------------------
-            SECTION 1: HERO / DECISION GATEWAY WIREFRAME
+            SECTION 1: HERO / INTERACTIVE RECOVERY VECTOR FLOW
             ----------------------------------------------------------------------- */}
         <section id="overview" className="wireframe-section hero-wireframe-section">
           <div className="hero-content-grid">
@@ -435,77 +635,120 @@ export function Story() {
               </div>
             </div>
 
-            {/* Original Decision Gateway Wireframe Visual */}
+            {/* Clickable 5-Node Hero Recovery Vector Flow */}
             <div className="hero-visual-wrapper">
               <div className="wireframe-panel decision-gateway-panel">
                 <div className="wireframe-panel-header">
-                  <span className="mono text-xs text-muted">DECISION GATEWAY WIREFRAME</span>
-                  <span className="chip provenance-enforced">POLICY v1 · CODE ENFORCED</span>
+                  <span className="mono text-xs text-muted">INTERACTIVE EVIDENCE FLOW</span>
+                  <span className={`chip ${heroVectorNodes[selectedHeroNode].badgeClass}`}>
+                    {heroVectorNodes[selectedHeroNode].provenance}
+                  </span>
                 </div>
 
                 <div className="gateway-vector-stage">
                   <svg
                     className="gateway-svg"
-                    viewBox="0 0 460 210"
+                    viewBox="0 0 460 170"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    aria-label="Decision gateway wireframe architecture"
+                    aria-label="Interactive recovery vector flowchart"
                   >
-                    {/* Dashed Perspective Projection Lines */}
-                    <line x1="30" y1="30" x2="230" y2="105" stroke="#d9d9d9" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="430" y1="30" x2="230" y2="105" stroke="#d9d9d9" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="30" y1="180" x2="230" y2="105" stroke="#d9d9d9" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="430" y1="180" x2="230" y2="105" stroke="#d9d9d9" strokeWidth="1" strokeDasharray="3 3" />
+                    {/* Background Connection Track */}
+                    <line x1="45" y1="85" x2="415" y2="85" stroke="#eaedf1" strokeWidth="2" />
 
-                    {/* Central Connectors */}
-                    <line x1="125" y1="105" x2="195" y2="105" stroke="#1b1b1b" strokeWidth="1.5" />
-                    <line x1="265" y1="105" x2="335" y2="105" stroke="#1b1b1b" strokeWidth="1.5" />
-                    <line x1="230" y1="55" x2="230" y2="75" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="2 2" />
+                    {/* Active Animated Connector Path */}
+                    <line
+                      x1="45"
+                      y1="85"
+                      x2={heroVectorNodes[selectedHeroNode].cx}
+                      y2="85"
+                      stroke="#0f1419"
+                      strokeWidth="2"
+                      className="hero-active-connector"
+                    />
 
-                    {/* Card A: Risk Signal (Left) */}
-                    <g className="svg-card-node">
-                      <rect x="25" y="70" width="100" height="70" rx="6" fill="#ffffff" stroke="#ef4444" strokeWidth="1.5" />
-                      <circle cx="38" cy="84" r="4" fill="#ef4444" />
-                      <text x="48" y="87" className="svg-tag mono">RISK SIGNAL</text>
-                      <text x="38" y="107" className="svg-bold-val mono">DC_08</text>
-                      <text x="38" y="125" className="svg-desc mono">Card declined</text>
-                    </g>
-
-                    {/* Central Node: Decision Gateway */}
-                    <g className="svg-gateway-core">
-                      <polygon points="230,75 265,105 230,135 195,105" fill="#1b1b1b" stroke="#1b1b1b" strokeWidth="2" />
-                      <circle cx="230" cy="105" r="7" fill="#f59e0b" />
-                      <text x="230" y="152" textAnchor="middle" className="svg-tag mono font-bold">DECISION GATEWAY</text>
-                      <text x="230" y="165" textAnchor="middle" className="svg-sub mono">Code Enforces</text>
-                    </g>
-
-                    {/* Card B: Policy Check (Top Center) */}
-                    <g className="svg-card-node">
-                      <rect x="175" y="10" width="110" height="45" rx="6" fill="#ffffff" stroke="#f59e0b" strokeWidth="1.5" />
-                      <rect x="185" y="18" width="6" height="6" fill="#f59e0b" />
-                      <text x="197" y="24" className="svg-tag mono">POLICY CHECK</text>
-                      <text x="185" y="42" className="svg-sub mono font-bold">≥ 0.60 · 1 action max</text>
-                    </g>
-
-                    {/* Card C: Outcome (Right) */}
-                    <g className="svg-card-node">
-                      <rect x="330" y="70" width="110" height="70" rx="6" fill="#ffffff" stroke="#10b981" strokeWidth="1.5" />
-                      <circle cx="344" cy="84" r="4" fill="#10b981" />
-                      <text x="354" y="87" className="svg-tag mono">OUTCOME</text>
-                      <text x="344" y="107" className="svg-bold-val mono text-green">
-                        {metrics?.verified_sandbox_recovered_amount != null
-                          ? `₹${Math.round(metrics.verified_sandbox_recovered_amount).toLocaleString('en-IN')}`
-                          : '₹—'}
-                      </text>
-                      <text x="344" y="125" className="svg-desc mono text-green">SANDBOX VERIFIED</text>
-                    </g>
+                    {/* 5 Clickable Vector Flow Nodes */}
+                    {heroVectorNodes.map((node) => {
+                      const isSelected = selectedHeroNode === node.id;
+                      return (
+                        <g
+                          key={node.id}
+                          className={`hero-flow-node-group ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setSelectedHeroNode(node.id)}
+                          role="button"
+                          tabIndex={0}
+                          aria-pressed={isSelected}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') setSelectedHeroNode(node.id);
+                          }}
+                        >
+                          <circle
+                            cx={node.cx}
+                            cy={node.cy}
+                            r={isSelected ? 16 : 13}
+                            fill={isSelected ? '#0f1419' : '#ffffff'}
+                            stroke={isSelected ? '#0f1419' : '#dcdfe4'}
+                            strokeWidth={isSelected ? 2.5 : 1.5}
+                            className="hero-node-circle"
+                          />
+                          <text
+                            x={node.cx}
+                            y={node.cy + 4}
+                            textAnchor="middle"
+                            fill={isSelected ? '#ffffff' : '#536471'}
+                            fontSize="9"
+                            fontFamily="monospace"
+                            fontWeight="bold"
+                          >
+                            {node.id + 1}
+                          </text>
+                          <text
+                            x={node.cx}
+                            y={node.cy + (isSelected ? 30 : 28)}
+                            textAnchor="middle"
+                            fill={isSelected ? '#0f1419' : '#8899a6'}
+                            fontSize="8"
+                            fontFamily="monospace"
+                            fontWeight={isSelected ? 'bold' : 'normal'}
+                            letterSpacing="0.04em"
+                          >
+                            {node.short}
+                          </text>
+                        </g>
+                      );
+                    })}
                   </svg>
                 </div>
 
-                <div className="wireframe-panel-footer">
-                  <span className="mono text-xs text-muted">
-                    Deterministic policy matrix ensures exactly one bounded recovery execution per session.
-                  </span>
+                {/* Grounded Node Evidence Inspection Panel */}
+                <div className="hero-node-evidence-box">
+                  <div className="hero-evidence-top">
+                    <span className="mono font-bold text-sm">
+                      {heroVectorNodes[selectedHeroNode].title}
+                    </span>
+                    <span className="mono text-xs text-muted">
+                      STAGE 0{selectedHeroNode + 1} OF 05
+                    </span>
+                  </div>
+
+                  <p className="hero-evidence-desc">
+                    {heroVectorNodes[selectedHeroNode].evidence}
+                  </p>
+
+                  <div className="hero-evidence-triad mono">
+                    <div className="triad-item">
+                      <span className="triad-label">OBSERVED</span>
+                      <span className="triad-val">{heroVectorNodes[selectedHeroNode].observed}</span>
+                    </div>
+                    <div className="triad-item">
+                      <span className="triad-label">NEXT</span>
+                      <span className="triad-val">{heroVectorNodes[selectedHeroNode].next}</span>
+                    </div>
+                    <div className="triad-item">
+                      <span className="triad-label">STORED</span>
+                      <span className="triad-val">{heroVectorNodes[selectedHeroNode].stored}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -534,13 +777,15 @@ export function Story() {
             </div>
 
             {/* Stages Grid */}
-            <div className="journey-nodes-row">
+            <div className="journey-nodes-row" role="tablist" aria-label="Checkout journey stages">
               {journeyStages.map((stage, idx) => {
                 const isSelected = selectedJourneyStage === idx;
                 return (
                   <button
                     key={stage.stage}
                     type="button"
+                    role="tab"
+                    aria-selected={isSelected}
                     className={`journey-node-box ${isSelected ? 'active' : ''} ${
                       stage.error ? 'node-error' : stage.warning ? 'node-warning' : stage.success ? 'node-success' : ''
                     }`}
@@ -563,7 +808,7 @@ export function Story() {
             </div>
 
             {/* Selected Detail Drawer */}
-            <div className="journey-drawer-box">
+            <div className="journey-drawer-box" role="tabpanel">
               <div className="drawer-top-line">
                 <span className="mono font-bold">{journeyStages[selectedJourneyStage].title}</span>
                 <span className="mono text-muted text-xs">STAGE {journeyStages[selectedJourneyStage].stage}</span>
@@ -594,8 +839,15 @@ export function Story() {
             <div className="chip provenance-enforced">POLICY v1 · CODE ENFORCED</div>
           </div>
 
-          {/* 5-Stage Wireframe Bar Analysis Visual */}
+          {/* 5-Stage Interactive Decision Analysis Chart */}
           <div className="wireframe-panel decision-chart-panel">
+            <div className="decision-chart-header-bar">
+              <span className="mono text-xs text-muted">
+                Illustrative process stages · not measured latency
+              </span>
+              <span className="mono text-xs text-muted">CLICK TO INSPECT PHASE</span>
+            </div>
+
             <div className="decision-chart-grid">
               {/* Horizontal Guide Lines */}
               <div className="chart-guides" aria-hidden="true">
@@ -606,19 +858,17 @@ export function Story() {
               </div>
 
               {/* 5 Stage Pillars */}
-              <div className="chart-pillars-row">
+              <div className="chart-pillars-row" role="tablist" aria-label="Decision engine phases">
                 {decisionSteps.map((step, idx) => {
                   const isSelected = selectedDecisionStep === idx;
                   return (
-                    <div
+                    <button
                       key={step.stage}
+                      type="button"
+                      role="tab"
+                      aria-selected={isSelected}
                       className={`chart-pillar-col ${isSelected ? 'selected' : ''} ${step.isDominant ? 'dominant' : ''}`}
                       onClick={() => setSelectedDecisionStep(idx)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') setSelectedDecisionStep(idx);
-                      }}
                     >
                       <div className="pillar-marker-token mono">{step.marker}</div>
                       <div className="pillar-bar-track">
@@ -629,14 +879,14 @@ export function Story() {
                       </div>
                       <span className="pillar-title mono">{step.title}</span>
                       <span className="pillar-sub mono">{step.subtitle}</span>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
             </div>
 
             {/* Selected Phase Invariant Details */}
-            <div className="decision-phase-card">
+            <div className="decision-phase-card" role="tabpanel">
               <div className="phase-card-header">
                 <div>
                   <span className="mono text-xs text-muted">
@@ -672,7 +922,7 @@ export function Story() {
         </section>
 
         {/* -----------------------------------------------------------------------
-            SECTION 4: RECOVERY PROOF & ORBIT FOCAL PANEL
+            SECTION 4: RECOVERY PROOF & INTERACTIVE ORBIT FOCAL PANEL
             ----------------------------------------------------------------------- */}
         <section id="proof" className="wireframe-section bordered-section">
           <div className="section-title-bar">
@@ -680,70 +930,69 @@ export function Story() {
               <span className="doc-section-tag mono">04 EMPIRICAL OUTCOMES</span>
               <h3 className="doc-section-heading">Recovery Proof & Calibration</h3>
               <p className="doc-section-sub">
-                Measured conversion lift and proven revenue settlement across evaluation sessions.
+                Measured conversion lift and proven revenue settlement across evaluation sessions. Click cards to expand evidence.
               </p>
             </div>
             <div className="chip sandbox">SANDBOX SIMULATION</div>
           </div>
 
-          {/* Staggered Vertical Evidence Columns */}
+          {/* Click-to-Expand Evidence Columns */}
           <div className="staggered-columns-grid">
-            {/* Column A: Recovery Lift */}
-            <div className="stagger-col col-offset-1">
-              <span className="stagger-tag mono">RECOVERY LIFT</span>
-              <div className="stagger-metric-val text-gold">{fmtLift(metrics?.recovery_lift)}</div>
-              <p className="stagger-desc">
-                Difference between recorded treatment and control conversion rates in this sandbox evaluation batch.
-              </p>
-            </div>
+            {metricEvidenceColumns.map((col) => {
+              const isExpanded = expandedMetricCol === col.id;
+              return (
+                <div
+                  key={col.id}
+                  className={`stagger-col col-offset-${col.id + 1} ${isExpanded ? 'expanded' : ''}`}
+                >
+                  <button
+                    type="button"
+                    className="stagger-col-toggle-btn"
+                    onClick={() => setExpandedMetricCol(isExpanded ? null : col.id)}
+                    aria-expanded={isExpanded}
+                  >
+                    <div className="col-header-chip">
+                      <span className="stagger-tag mono">{col.tag}</span>
+                      {col.chipTag && <span className={`chip ${col.chipClass}`}>{col.chipTag}</span>}
+                    </div>
+                    <div className={`stagger-metric-val ${col.valClass}`}>{col.value}</div>
+                    <p className="stagger-desc">{col.shortDesc}</p>
+                    <div className="stagger-expand-affordance mono text-xs">
+                      <span>{isExpanded ? 'Hide methodology' : 'Click to inspect'}</span>
+                      <ChevronDown
+                        size={12}
+                        className={`expand-chevron ${isExpanded ? 'rotated' : ''}`}
+                      />
+                    </div>
+                  </button>
 
-            {/* Column B: Agent Conversion */}
-            <div className="stagger-col col-offset-2">
-              <span className="stagger-tag mono">AGENT CONVERSION</span>
-              <div className="stagger-metric-val">{fmtPct(metrics?.agent_conversion)}</div>
-              <p className="stagger-desc">
-                Recorded treatment cohort conversion. Baseline: {fmtPct(metrics?.baseline_conversion)}.
-              </p>
-            </div>
-
-            {/* Column C: Sandbox Verified */}
-            <div className="stagger-col col-offset-3">
-              <div className="col-header-chip">
-                <span className="stagger-tag mono">SANDBOX VERIFIED</span>
-                <span className="chip provenance-verified">REAL RAILS</span>
-              </div>
-              <div className="stagger-metric-val text-green">
-                {fmtCurrency(metrics?.verified_sandbox_recovered_amount)}
-              </div>
-              <p className="stagger-desc">
-                Successful sandbox retry evidence only. Real terminal status <code className="mono">succeeded</code>.
-              </p>
-            </div>
-
-            {/* Column D: Policy Evidence */}
-            <div className="stagger-col col-offset-4">
-              <div className="col-header-chip">
-                <span className="stagger-tag mono">POLICY EVIDENCE</span>
-                <span className="chip sandbox">PARTIAL</span>
-              </div>
-              <div className="stagger-metric-val">
-                {metrics?.abstentions != null ? metrics.abstentions : '—'}
-              </div>
-              <p className="stagger-desc">
-                Recorded abstentions are a safety outcome. Policy checks are partial where stored evidence cannot conclusively verify an invariant.
-              </p>
-            </div>
+                  {/* Inline Expandable Methodology Panel */}
+                  {isExpanded && (
+                    <div className="stagger-expanded-content">
+                      <div className="expanded-title mono font-bold">{col.expandedTitle}</div>
+                      <p className="expanded-text">{col.expandedDetail}</p>
+                      <div className="chip chip-neutral mono text-xs mt-2">{col.provenance}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* Original Orbit / Focal Evidence Panel */}
+          {/* Interactive Orbit Focal Evidence Panel */}
           <div className="wireframe-panel orbit-focal-panel">
+            <div className="orbit-interactive-header">
+              <span className="mono text-xs text-muted">EVIDENCE ORBIT · CLICK NODE TO INSPECT</span>
+              <span className="chip sandbox">SANDBOX PROVENANCE</span>
+            </div>
+
             <div className="orbit-canvas-wrapper">
               <svg
                 className="orbit-svg"
                 viewBox="0 0 500 240"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                aria-label="Orbit focal evidence diagram"
+                aria-label="Interactive recovery orbit evidence diagram"
               >
                 {/* Outer Dashed Orbit Path */}
                 <ellipse
@@ -751,7 +1000,7 @@ export function Story() {
                   cy="120"
                   rx="220"
                   ry="95"
-                  stroke="#d9d9d9"
+                  stroke="#dcdfe4"
                   strokeWidth="1.5"
                   strokeDasharray="6 6"
                   className="orbit-ring-dashed"
@@ -763,47 +1012,95 @@ export function Story() {
                   cy="120"
                   rx="180"
                   ry="70"
-                  stroke="#1b1b1b"
+                  stroke="#0f1419"
                   strokeWidth="1"
                   className="orbit-ring-solid"
                 />
 
-                {/* Geometric Evidence Orbit Tokens */}
-                <g className="orbit-token token-1">
-                  <circle cx="70" cy="120" r="6" fill="#ffffff" stroke="#1b1b1b" strokeWidth="1.5" />
-                  <circle cx="70" cy="120" r="2" fill="#1b1b1b" />
-                  <text x="70" y="142" textAnchor="middle" className="svg-sub mono">DC_08</text>
+                {/* Interactive Geometric Orbit Tokens */}
+                {/* Token 0: DC_08 (Left) */}
+                <g
+                  className={`orbit-token token-0 ${selectedOrbitToken === 0 ? 'selected' : ''}`}
+                  onClick={() => setSelectedOrbitToken(0)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedOrbitToken === 0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedOrbitToken(0);
+                  }}
+                >
+                  <circle cx="70" cy="120" r={selectedOrbitToken === 0 ? 12 : 8} fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
+                  <circle cx="70" cy="120" r="3" fill="#ef4444" />
+                  <text x="70" y="145" textAnchor="middle" className="svg-sub mono text-red font-bold">DC_08</text>
                 </g>
 
-                <g className="orbit-token token-2">
-                  <rect x="424" y="114" width="12" height="12" rx="2" fill="#ffffff" stroke="#10b981" strokeWidth="1.5" />
-                  <circle cx="430" cy="120" r="2" fill="#10b981" />
-                  <text x="430" y="142" textAnchor="middle" className="svg-sub mono text-green">Retry</text>
+                {/* Token 1: ONE ACTION (Top) */}
+                <g
+                  className={`orbit-token token-1 ${selectedOrbitToken === 1 ? 'selected' : ''}`}
+                  onClick={() => setSelectedOrbitToken(1)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedOrbitToken === 1}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedOrbitToken(1);
+                  }}
+                >
+                  <polygon points="250,18 258,28 250,38 242,28" fill={selectedOrbitToken === 1 ? '#f59e0b' : '#ffffff'} stroke="#f59e0b" strokeWidth="2" />
+                  <text x="250" y="12" textAnchor="middle" className="svg-sub mono text-gold font-bold">ONE ACTION</text>
                 </g>
 
-                <g className="orbit-token token-3">
-                  <polygon points="250,20 256,28 250,36 244,28" fill="#f59e0b" />
-                  <text x="250" y="15" textAnchor="middle" className="svg-sub mono text-gold">Policy</text>
+                {/* Token 2: SANDBOX VERIFIED (Right) */}
+                <g
+                  className={`orbit-token token-2 ${selectedOrbitToken === 2 ? 'selected' : ''}`}
+                  onClick={() => setSelectedOrbitToken(2)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedOrbitToken === 2}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedOrbitToken(2);
+                  }}
+                >
+                  <rect x="422" y="112" width={selectedOrbitToken === 2 ? 18 : 14} height={selectedOrbitToken === 2 ? 18 : 14} rx="3" fill="#ffffff" stroke="#10b981" strokeWidth="2" />
+                  <circle cx="430" cy="120" r="3" fill="#10b981" />
+                  <text x="430" y="145" textAnchor="middle" className="svg-sub mono text-green font-bold">VERIFIED</text>
+                </g>
+
+                {/* Token 3: AUDIT LOG (Bottom) */}
+                <g
+                  className={`orbit-token token-3 ${selectedOrbitToken === 3 ? 'selected' : ''}`}
+                  onClick={() => setSelectedOrbitToken(3)}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={selectedOrbitToken === 3}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedOrbitToken(3);
+                  }}
+                >
+                  <circle cx="250" cy="215" r={selectedOrbitToken === 3 ? 12 : 8} fill="#ffffff" stroke="#0f1419" strokeWidth="2" />
+                  <circle cx="250" cy="215" r="3" fill="#0f1419" />
+                  <text x="250" y="235" textAnchor="middle" className="svg-sub mono font-bold">AUDIT</text>
                 </g>
               </svg>
 
-              {/* Center Focal Box */}
+              {/* Dynamic Center Focal Evidence Box */}
               <div className="orbit-center-card">
-                <span className="chip sandbox" style={{ marginBottom: '0.5rem' }}>
-                  TOTAL MODELED RECOVERY
+                <span className={`chip ${orbitTokens[selectedOrbitToken].chipClass}`} style={{ marginBottom: '0.4rem' }}>
+                  {orbitTokens[selectedOrbitToken].provenance}
                 </span>
                 <div className="orbit-focal-amount">
-                  {fmtCurrency(metrics?.total_modeled_recovered_amount)}
+                  {orbitTokens[selectedOrbitToken].amount != null
+                    ? fmtCurrency(orbitTokens[selectedOrbitToken].amount)
+                    : orbitTokens[selectedOrbitToken].code}
                 </div>
                 <p className="orbit-method-line mono">
-                  Verified sandbox retries + simulated nudge outcomes
+                  {orbitTokens[selectedOrbitToken].explanation}
                 </p>
                 <div className="orbit-disclaimer-tag mono">
-                  Not settled/live money.
+                  Not settled/live money · Historical batch evaluation.
                 </div>
-                <Link to="/ledger" className="doc-link-action mono" style={{ marginTop: '1rem' }}>
+                <Link to="/ledger" className="doc-link-action mono" style={{ marginTop: '0.85rem' }}>
                   <span>Inspect recovery ledger</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={13} />
                 </Link>
               </div>
             </div>
@@ -828,13 +1125,13 @@ export function Story() {
         </section>
 
         {/* -----------------------------------------------------------------------
-            SECTION 6: POLICY MATRIX
+            SECTION 6: POLICY MATRIX & INTERACTIVE ABSTENTION GATE
             ----------------------------------------------------------------------- */}
         <section id="policy" className="wireframe-section bordered-section">
           <div className="section-title-bar">
             <div>
               <span className="doc-section-tag mono">05 GOVERNANCE</span>
-              <h3 className="doc-section-heading">Policy Matrix</h3>
+              <h3 className="doc-section-heading">Policy Matrix & Safety Gate</h3>
               <p className="doc-section-sub">
                 Deterministic invariants enforced in code before any action dispatches.
               </p>
@@ -846,15 +1143,12 @@ export function Story() {
             {guardrailRules.map((rule, idx) => {
               const isExpanded = selectedPolicyRule === idx;
               return (
-                <div
+                <button
                   key={rule.id}
+                  type="button"
                   className={`matrix-tile ${isExpanded ? 'expanded' : ''}`}
                   onClick={() => setSelectedPolicyRule(isExpanded ? null : idx)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') setSelectedPolicyRule(isExpanded ? null : idx);
-                  }}
+                  aria-expanded={isExpanded}
                 >
                   <div className="tile-top-bar">
                     <span className="chip provenance-enforced">{rule.tag}</span>
@@ -863,12 +1157,63 @@ export function Story() {
                   <h4 className="matrix-tile-title">{rule.rule}</h4>
                   <div className="matrix-tile-val mono">{rule.value}</div>
                   <p className="matrix-tile-desc">{rule.explanation}</p>
-                </div>
+                </button>
               );
             })}
           </div>
 
-          <div className="proof-action-row">
+          {/* Interactive Abstention Gate Trace */}
+          <div className="wireframe-panel abstention-gate-panel" style={{ marginTop: '2rem' }}>
+            <div className="abstention-gate-header">
+              <div>
+                <span className="doc-section-tag mono">SAFETY ENFORCEMENT TRACE</span>
+                <h4 className="font-serif text-lg font-medium m-0">
+                  Interactive Abstention Gate: Stale Session Evaluation
+                </h4>
+              </div>
+              <span className="chip sandbox">GUARDRAIL ABSTAINED</span>
+            </div>
+
+            {/* 3-Step Selection Buttons */}
+            <div className="abstention-steps-nav" role="tablist">
+              {abstentionSteps.map((step) => {
+                const isSelected = selectedAbstainStep === step.id;
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelected}
+                    className={`abstain-step-btn ${isSelected ? 'active' : ''}`}
+                    onClick={() => setSelectedAbstainStep(step.id)}
+                  >
+                    <span className="mono font-bold text-xs">{step.title}</span>
+                    <span className="text-xs text-muted">{step.subtitle}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Active Abstention Trace Details */}
+            <div className="abstention-trace-card" role="tabpanel">
+              <div className="trace-header">
+                <span className="mono font-bold text-sm">
+                  {abstentionSteps[selectedAbstainStep].title}
+                </span>
+                <span className={`chip ${abstentionSteps[selectedAbstainStep].chipClass}`}>
+                  {abstentionSteps[selectedAbstainStep].tag}
+                </span>
+              </div>
+              <p className="trace-detail-text">
+                {abstentionSteps[selectedAbstainStep].detail}
+              </p>
+              <div className="trace-evidence-code mono">
+                {abstentionSteps[selectedAbstainStep].storedEvidence}
+              </div>
+            </div>
+          </div>
+
+          <div className="proof-action-row" style={{ marginTop: '2rem' }}>
             <Link to="/policy" className="doc-link-action mono">
               <span>Open Policy Studio</span>
               <ArrowRight size={14} />
@@ -955,115 +1300,83 @@ export function Story() {
               <div className="arch-icon-box">
                 <LayoutDashboard size={18} />
               </div>
-              <span className="mono arch-tag">OPERATOR UI</span>
+              <span className="mono arch-tag">OPERATIONS</span>
               <h4 className="arch-heading">Merchant Console</h4>
               <p className="arch-p">
-                Read-only observability: Recovery Queue, Policy Studio, Error Intelligence, and Full Replay.
+                Read-only surface for audit analysis, queue inspection, session comparison, and policy stress tests.
               </p>
             </div>
-          </div>
-
-          <div className="proof-action-row">
-            <Link to="/architecture" className="doc-link-action mono">
-              <span>Open Architecture Explorer</span>
-              <ArrowRight size={14} />
-            </Link>
-            <Link to="/audit-log" className="doc-link-action mono">
-              <span>View Audit Trail</span>
-              <ArrowRight size={14} />
-            </Link>
           </div>
         </section>
 
         {/* -----------------------------------------------------------------------
-            SECTION 8: CONSOLE DIRECTORY
+            SECTION 8: FINALE & CONSOLE DIRECTORY
             ----------------------------------------------------------------------- */}
-        <section id="console" className="wireframe-section finale-section">
+        <section className="wireframe-section finale-section">
           <div className="finale-inner">
-            <span className="doc-section-tag mono">07 COMPLETE EVIDENCE TRAIL</span>
-            <h2 className="finale-heading">Inspect the live console.</h2>
+            <span className="doc-tree-eyebrow mono">GET STARTED</span>
+            <h3 className="finale-heading">Explore the Operational Surface</h3>
             <p className="finale-subheading">
-              Every metric, proposal, decline code, and guardrail decision is fully auditable in the merchant console.
+              Step from product narrative into live read-only merchant consoles, calibration tables, and step-by-step session replays.
             </p>
 
             <div className="console-grid">
               <Link to="/" className="console-tile">
-                <LayoutDashboard size={16} />
-                <span className="mono font-bold">Overview</span>
-                <span className="tile-sub">Batch metrics & lift</span>
+                <LayoutDashboard size={18} />
+                <span className="mono font-bold text-xs">Overview</span>
+                <span className="tile-sub">Metrics & funnel</span>
               </Link>
               <Link to="/recovery-queue" className="console-tile">
-                <Layers size={16} />
-                <span className="mono font-bold">Recovery Queue</span>
-                <span className="tile-sub">Session inspection</span>
+                <Activity size={18} />
+                <span className="mono font-bold text-xs">Recovery Queue</span>
+                <span className="tile-sub">Session ledger</span>
               </Link>
               <Link to="/policy" className="console-tile">
-                <ShieldCheck size={16} />
-                <span className="mono font-bold">Policy Studio</span>
-                <span className="tile-sub">Deterministic rules</span>
+                <ShieldCheck size={18} />
+                <span className="mono font-bold text-xs">Policy Studio</span>
+                <span className="tile-sub">Code guardrails</span>
               </Link>
               <Link to="/guardrail-tracer" className="console-tile">
-                <Navigation size={16} />
-                <span className="mono font-bold">Guardrail Tracer</span>
-                <span className="tile-sub">Replay rule chains</span>
-              </Link>
-              <Link to="/policy-analysis" className="console-tile">
-                <Scale size={16} />
-                <span className="mono font-bold">Policy Analysis</span>
-                <span className="tile-sub">Coverage & calibration</span>
-              </Link>
-              <Link to="/ledger" className="console-tile">
-                <BookOpen size={16} />
-                <span className="mono font-bold">Recovery Ledger</span>
-                <span className="tile-sub">Provenance accounting</span>
-              </Link>
-              <Link to="/architecture" className="console-tile">
-                <Workflow size={16} />
-                <span className="mono font-bold">Architecture</span>
-                <span className="tile-sub">System node explorer</span>
-              </Link>
-              <Link to="/audit-log" className="console-tile">
-                <ScrollText size={16} />
-                <span className="mono font-bold">Audit Log</span>
-                <span className="tile-sub">Audit records</span>
+                <Workflow size={18} />
+                <span className="mono font-bold text-xs">Guardrail Tracer</span>
+                <span className="tile-sub">Stress testing</span>
               </Link>
             </div>
 
-            <div className="truth-disclaimer-card">
-              <span className="mono text-xs text-muted">
-                SANDBOX SIMULATION — REAL HYPERSWITCH PAYMENT RAILS · SIMULATED CUSTOMER OUTCOMES
-              </span>
+            <div className="truth-disclaimer-card mono text-xs text-muted">
+              Real sandbox payment rails. Simulated customer outcomes. Policy checks are partial where stored evidence cannot conclusively verify an invariant.
             </div>
           </div>
         </section>
       </main>
 
-      {/* =========================================================================
-          FLOATING ACTION CAPSULE (Desktop-Only Bottom Center)
-          ========================================================================= */}
-      <div className={`floating-action-capsule ${footerInView ? 'capsule-hidden' : ''}`} aria-hidden="true">
-        <Link to={primaryReplayUrl} className="capsule-btn-primary">
-          <Play size={13} />
-          <span>Watch recovery replay</span>
+      {/* Floating Action Capsule */}
+      <div
+        className={`floating-action-capsule ${footerInView ? 'capsule-hidden' : ''}`}
+        aria-hidden={footerInView}
+      >
+        <Link to="/" className="capsule-btn-primary">
+          <LayoutDashboard size={13} />
+          <span>Explore Console</span>
         </Link>
-        <div className="capsule-divider"></div>
-        <Link to="/" className="capsule-btn-sub">
-          <span>Explore console</span>
+        <div className="capsule-divider" />
+        <Link to={primaryReplayUrl} className="capsule-btn-sub">
+          <span>Watch Replay</span>
         </Link>
       </div>
 
-      {/* =========================================================================
-          BOTTOM FOOTER BAR
-          ========================================================================= */}
+      {/* Story Bottom Footer */}
       <footer ref={footerRef} className="story-bottom-footer">
-        <div className="footer-left mono text-xs text-muted">
-          © 2024 Checkout Recovery Agent · Real sandbox payment rails. Simulated customer outcomes.
+        <div className="footer-left">
+          <span className="mono text-xs text-muted">
+            CHECKOUT RECOVERY AGENT · SANDBOX EVALUATION SPECIFICATION
+          </span>
         </div>
         <div className="footer-right">
           <Link to="/" className="footer-link mono">Console</Link>
-          <Link to={primaryReplayUrl} className="footer-link mono">Replay</Link>
           <Link to="/policy" className="footer-link mono">Policy</Link>
           <Link to="/architecture" className="footer-link mono">Architecture</Link>
+          <Link to="/audit-log" className="footer-link mono">Audit Log</Link>
         </div>
       </footer>
     </div>

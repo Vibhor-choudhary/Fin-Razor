@@ -50,6 +50,7 @@
 .arch-node.selected {
   border-color: var(--fg);
   background: var(--bg-panel);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .arch-node.boundary-real {
@@ -84,8 +85,15 @@
 .arch-arrow {
   color: var(--fg-dim);
   margin-top: 1.5rem;
-  opacity: 0.6;
+  opacity: 0.4;
   transform: rotate(90deg);
+  transition: color 250ms ease-out, opacity 250ms ease-out, transform 250ms ease-out;
+}
+
+.arch-arrow.active-path {
+  color: var(--fg);
+  opacity: 1;
+  transform: rotate(90deg) scale(1.15);
 }
 
 .arch-edge-badge {
@@ -153,6 +161,9 @@
     margin-left: 1.5rem;
     transform: rotate(0deg);
   }
+  .arch-arrow.active-path {
+    transform: rotate(0deg) scale(1.15);
+  }
   .arch-edge-badge {
     top: 50%;
     left: calc(100% + 0.25rem);
@@ -167,5 +178,13 @@
   .arch-drawer {
     position: static;
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arch-arrow,
+  .arch-node {
+    transition: none !important;
+    transform: none !important;
   }
 }
