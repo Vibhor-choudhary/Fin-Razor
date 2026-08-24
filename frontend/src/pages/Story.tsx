@@ -489,15 +489,15 @@ export function Story() {
 
                     {/* Card C: Outcome (Right) */}
                     <g className="svg-card-node">
-                      <rect x="335" y="70" width="100" height="70" rx="6" fill="#ffffff" stroke="#10b981" strokeWidth="1.5" />
-                      <circle cx="348" cy="84" r="4" fill="#10b981" />
-                      <text x="358" y="87" className="svg-tag mono">OUTCOME</text>
-                      <text x="348" y="107" className="svg-bold-val mono text-green">
+                      <rect x="330" y="70" width="110" height="70" rx="6" fill="#ffffff" stroke="#10b981" strokeWidth="1.5" />
+                      <circle cx="344" cy="84" r="4" fill="#10b981" />
+                      <text x="354" y="87" className="svg-tag mono">OUTCOME</text>
+                      <text x="344" y="107" className="svg-bold-val mono text-green">
                         {metrics?.verified_sandbox_recovered_amount != null
-                          ? `₹${Math.round(metrics.verified_sandbox_recovered_amount).toLocaleString()}`
+                          ? `₹${Math.round(metrics.verified_sandbox_recovered_amount).toLocaleString('en-IN')}`
                           : '₹—'}
                       </text>
-                      <text x="348" y="125" className="svg-desc mono text-green">SANDBOX VERIFIED</text>
+                      <text x="344" y="125" className="svg-desc mono text-green">SANDBOX VERIFIED</text>
                     </g>
                   </svg>
                 </div>
