@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   ChevronDown
 } from 'lucide-react';
+import { useGuidedTrace } from '../hooks/useGuidedTrace';
 import './Story.css';
 
 interface NavSection {
@@ -38,12 +39,32 @@ export function Story() {
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   
-  // Interactive Component States
-  const [selectedHeroNode, setSelectedHeroNode] = useState<number>(2); // Default to DC_08
-  const [selectedDecisionStep, setSelectedDecisionStep] = useState<number>(2); // Default to ENFORCE
-  const [selectedOrbitToken, setSelectedOrbitToken] = useState<number>(2); // Default to Sandbox Verified
+  // Interactive Component States (Guided Trace)
+  const {
+    selectedIndex: selectedHeroNode,
+    selectItem: setSelectedHeroNode,
+    containerRef: heroContainerRef
+  } = useGuidedTrace({ totalItems: 5, initialIndex: 2 });
+
+  const {
+    selectedIndex: selectedDecisionStep,
+    selectItem: setSelectedDecisionStep,
+    containerRef: decisionContainerRef
+  } = useGuidedTrace({ totalItems: 5, initialIndex: 2 });
+
+  const {
+    selectedIndex: selectedOrbitToken,
+    selectItem: setSelectedOrbitToken,
+    containerRef: orbitContainerRef
+  } = useGuidedTrace({ totalItems: 4, initialIndex: 2 });
+
+  const {
+    selectedIndex: selectedAbstainStep,
+    selectItem: setSelectedAbstainStep,
+    containerRef: abstainContainerRef
+  } = useGuidedTrace({ totalItems: 3, initialIndex: 1 });
+
   const [expandedMetricCol, setExpandedMetricCol] = useState<number | null>(null); // Inline expand
-  const [selectedAbstainStep, setSelectedAbstainStep] = useState<number>(1); // Default to Policy Check
   const [selectedPolicyRule, setSelectedPolicyRule] = useState<number | null>(null);
   const [selectedJourneyStage, setSelectedJourneyStage] = useState<number>(2); // Default to DC_08
   const [footerInView, setFooterInView] = useState<boolean>(false);
@@ -636,7 +657,7 @@ export function Story() {
             </div>
 
             {/* Clickable 5-Node Hero Recovery Vector Flow */}
-            <div className="hero-visual-wrapper">
+            <div className="hero-visual-wrapper" ref={heroContainerRef as React.RefObject<HTMLDivElement>}>
               <div className="wireframe-panel decision-gateway-panel">
                 <div className="wireframe-panel-header">
                   <span className="mono text-xs text-muted">INTERACTIVE EVIDENCE FLOW</span>
@@ -840,7 +861,7 @@ export function Story() {
           </div>
 
           {/* 5-Stage Interactive Decision Analysis Chart */}
-          <div className="wireframe-panel decision-chart-panel">
+          <div className="wireframe-panel decision-chart-panel" ref={decisionContainerRef as React.RefObject<HTMLDivElement>}>
             <div className="decision-chart-header-bar">
               <span className="mono text-xs text-muted">
                 Illustrative process stages · not measured latency
@@ -980,7 +1001,7 @@ export function Story() {
           </div>
 
           {/* Interactive Orbit Focal Evidence Panel */}
-          <div className="wireframe-panel orbit-focal-panel">
+          <div className="wireframe-panel orbit-focal-panel" ref={orbitContainerRef as React.RefObject<HTMLDivElement>}>
             <div className="orbit-interactive-header">
               <span className="mono text-xs text-muted">EVIDENCE ORBIT · CLICK NODE TO INSPECT</span>
               <span className="chip sandbox">SANDBOX PROVENANCE</span>
@@ -1163,7 +1184,7 @@ export function Story() {
           </div>
 
           {/* Interactive Abstention Gate Trace */}
-          <div className="wireframe-panel abstention-gate-panel" style={{ marginTop: '2rem' }}>
+          <div className="wireframe-panel abstention-gate-panel" style={{ marginTop: '2rem' }} ref={abstainContainerRef as React.RefObject<HTMLDivElement>}>
             <div className="abstention-gate-header">
               <div>
                 <span className="doc-section-tag mono">SAFETY ENFORCEMENT TRACE</span>

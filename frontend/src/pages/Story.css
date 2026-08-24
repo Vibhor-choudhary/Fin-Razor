@@ -166,9 +166,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .doc-nav-node:hover {
-    background-color: var(--wf-panel-bg);
-    color: var(--wf-ink);
-    transform: translateX(2px);
+    border-color: #808080;
   }
 }
 
@@ -245,9 +243,7 @@
 }
 
 .doc-btn-outline:hover {
-  background-color: var(--wf-panel-bg);
-  border-color: var(--wf-ink-muted);
-  transform: translateY(-1px);
+  border-color: #808080;
 }
 
 /* =========================================================================
@@ -521,8 +517,7 @@
 }
 
 .hero-flow-node-group:hover .hero-node-circle {
-  stroke: var(--wf-ink);
-  stroke-width: 2px;
+  stroke: #808080;
 }
 
 .hero-active-connector {
@@ -632,7 +627,7 @@
 }
 
 .journey-node-box:hover {
-  transform: scale(1.04);
+  border-color: #808080;
 }
 
 .journey-node-box.active {
@@ -792,8 +787,7 @@
 }
 
 .chart-pillar-col:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-  transform: translateY(-2px);
+  border-color: #808080;
 }
 
 .chart-pillar-col.selected {
@@ -950,7 +944,7 @@
 }
 
 .stagger-col:hover {
-  border-color: var(--wf-ink);
+  border-color: #808080;
 }
 
 .stagger-col.expanded {
@@ -1093,7 +1087,7 @@
 }
 
 .orbit-token:hover {
-  transform: scale(1.15);
+  border-color: #808080;
 }
 
 .orbit-center-card {
@@ -1203,8 +1197,7 @@
 }
 
 .matrix-tile:hover {
-  border-color: var(--wf-ink);
-  transform: translateY(-2px);
+  border-color: #808080;
 }
 
 .matrix-tile.expanded {
@@ -1291,17 +1284,19 @@
 }
 
 .abstain-step-btn:hover {
-  border-color: var(--wf-ink);
+  border-color: #808080;
 }
 
 .abstain-step-btn.active {
   border-color: var(--wf-ink);
-  background-color: #0f1419;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: var(--wf-ink);
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .abstain-step-btn.active .text-muted {
-  color: #8899a6;
+  color: var(--wf-ink-muted);
 }
 
 .abstention-trace-card {
@@ -1446,14 +1441,7 @@
 }
 
 .console-tile:hover {
-  background-color: #0f1419;
-  color: #ffffff;
-  border-color: #0f1419;
-  transform: translateY(-2px);
-}
-
-.console-tile:hover .tile-sub {
-  color: #8899a6;
+  border-color: #808080;
 }
 
 .tile-sub {

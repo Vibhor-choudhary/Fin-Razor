@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Server, Database, BrainCircuit, ShieldCheck, Activity, LayoutDashboard, ArrowRight } from 'lucide-react';
+import { useGuidedTrace } from '../hooks/useGuidedTrace';
 import './Architecture.css';
 
 interface NodeData {
@@ -95,12 +95,17 @@ const NODES: NodeData[] = [
 ];
 
 export function Architecture() {
-  const [selectedId, setSelectedId] = useState<string>('hyperswitch');
-  const selectedIndex = NODES.findIndex(n => n.id === selectedId);
-  const selectedNode = NODES[selectedIndex >= 0 ? selectedIndex : 0];
+  const {
+    selectedIndex,
+    selectItem: setSelectedIndex,
+    containerRef
+  } = useGuidedTrace({ totalItems: NODES.length, initialIndex: 0 });
+  
+  const selectedNode = NODES[selectedIndex];
+  const selectedId = selectedNode.id;
 
   return (
-    <div className="arch-container slide-up">
+    <div className="arch-container slide-up" ref={containerRef as React.RefObject<HTMLDivElement>}>
       <div className="header" style={{ marginBottom: '2rem' }}>
         <h1 className="title">Architecture Explorer</h1>
         <div className="methodology">
@@ -118,7 +123,7 @@ export function Architecture() {
               <div key={node.id} className="arch-step-wrapper">
                 <button 
                   className={`arch-node ${isSelected ? 'selected' : ''} ${node.boundary === 'real' ? 'boundary-real' : node.boundary === 'simulated' ? 'boundary-simulated' : ''}`}
-                  onClick={() => setSelectedId(node.id)}
+                  onClick={() => setSelectedIndex(i)}
                   aria-pressed={isSelected}
                 >
                   <Icon className="node-icon" size={24} />

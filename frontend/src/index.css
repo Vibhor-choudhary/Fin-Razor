@@ -243,13 +243,12 @@ a {
 @media (hover: hover) and (pointer: fine) {
   .nav-item:hover {
     color: var(--fg);
-    background-color: var(--bg-panel);
-    transform: translateX(2px);
+    border-color: #808080;
   }
 }
 
 .nav-item:active {
-  transform: translateX(0);
+  border-color: var(--fg);
 }
 
 .nav-item.active {
