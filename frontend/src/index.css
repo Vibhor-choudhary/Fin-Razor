@@ -206,17 +206,20 @@ a {
 }
 
 .sidebar-nav-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .sidebar-group-label {
   font-family: var(--font-mono);
   font-size: 0.65rem;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   color: var(--fg-dim);
   display: block;
-  margin-bottom: 0.45rem;
-  padding-left: 0.5rem;
+  margin-bottom: 0.4rem;
+  padding-left: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -228,16 +231,25 @@ a {
   color: var(--fg-muted);
   font-family: var(--font-mono);
   font-size: 0.78rem;
+  font-weight: 450;
   border-left: 2px solid transparent;
   border-radius: 0 4px 4px 0;
-  transition: all var(--transition-fast);
-  margin-bottom: 0.15rem;
+  transition: background-color 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out, transform 200ms ease-out;
+  margin-bottom: 0.1rem;
   text-decoration: none;
+  position: relative;
 }
 
-.nav-item:hover {
-  color: var(--fg);
-  background-color: var(--bg-panel);
+@media (hover: hover) and (pointer: fine) {
+  .nav-item:hover {
+    color: var(--fg);
+    background-color: var(--bg-panel);
+    transform: translateX(2px);
+  }
+}
+
+.nav-item:active {
+  transform: translateX(0);
 }
 
 .nav-item.active {
@@ -637,13 +649,15 @@ select.btn {
     left: -280px;
     width: 260px;
     height: calc(100vh - 60px);
-    transition: left var(--transition-fast);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: left 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease-out;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
     background-color: var(--bg-surface);
   }
 
   .sidebar.open {
     left: 0;
+    opacity: 1;
   }
 
   .main-content {
