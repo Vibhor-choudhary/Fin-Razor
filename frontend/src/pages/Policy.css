@@ -1,13 +1,12 @@
 .policy-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1rem;
 }
 
 .slide-in {
-  animation: slideIn 0.5s ease-out forwards;
+  animation: slideIn 0.4s ease-out forwards;
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(8px);
 }
 
 @keyframes slideIn {
@@ -29,7 +28,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   flex-wrap: wrap;
   gap: 1.5rem;
 }
@@ -41,18 +40,20 @@
 
 .eyebrow {
   color: var(--gold);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
   margin-bottom: 0.5rem;
+  font-family: var(--font-mono);
 }
 
 .policy-header .title {
-  margin: 0 0 1rem 0;
-  font-size: 1.8rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  font-family: var(--font-serif);
 }
 
 .description {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--fg-muted);
   max-width: 600px;
   line-height: 1.5;
@@ -66,16 +67,17 @@
 }
 
 .provenance-enforced {
-  background: rgba(212, 175, 55, 0.1);
+  background: var(--gold-muted);
   color: var(--gold);
   display: inline-flex;
   align-items: center;
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .status-note {
   font-size: 0.7rem;
-  color: var(--fg-muted);
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
 }
 
 .decision-boundary {
@@ -84,8 +86,9 @@
   justify-content: space-between;
   padding: 1.5rem;
   margin-bottom: 3rem;
-  background: var(--bg-hover);
+  background: var(--bg-panel);
   border: 1px solid var(--gold);
+  border-radius: var(--radius-card);
   overflow-x: auto;
   gap: 1rem;
 }
@@ -93,28 +96,30 @@
 .flow-step {
   display: flex;
   align-items: center;
-  font-size: 0.85rem;
-  padding: 0.5rem 1rem;
-  background: var(--bg-card);
-  border-radius: 4px;
+  font-size: 0.82rem;
+  padding: 0.55rem 1rem;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   white-space: nowrap;
+  font-family: var(--font-mono);
 }
 
 .flow-step.advisory {
-  border-color: rgba(6, 182, 212, 0.5); /* Muted cyan */
-  color: #06b6d4;
+  border-color: rgba(6, 182, 212, 0.4);
+  color: var(--simulated);
+  background: var(--simulated-muted);
 }
 
 .flow-step.authoritative {
-  background: rgba(212, 175, 55, 0.1);
+  background: var(--gold-muted);
   border-color: var(--gold);
   color: var(--gold);
   font-weight: bold;
 }
 
 .flow-arrow {
-  color: var(--fg-muted);
+  color: var(--fg-dim);
 }
 
 .policy-grid-section {
@@ -124,6 +129,7 @@
 .policy-grid-section h2 {
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
+  font-family: var(--font-serif);
 }
 
 .policy-grid {
@@ -133,20 +139,26 @@
 }
 
 .policy-card {
-  background: var(--bg-card);
+  background: #ffffff;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-card);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+
+.policy-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--fg);
 }
 
 .card-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .icon-gold {
@@ -155,8 +167,9 @@
 
 .card-header h3 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   flex: 1;
+  font-family: var(--font-serif);
 }
 
 .card-header .chip {
@@ -165,19 +178,20 @@
 }
 
 .card-value {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--fg);
-  background: var(--bg-hover);
-  padding: 0.5rem;
+  background: var(--bg-panel);
+  padding: 0.4rem 0.65rem;
   border-radius: 4px;
   display: inline-block;
   align-self: flex-start;
+  font-family: var(--font-mono);
 }
 
 .card-why, .card-effect {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.88rem;
+  line-height: 1.45;
   color: var(--fg-muted);
 }
 
@@ -189,6 +203,7 @@
   margin-top: 0;
   margin-bottom: 1.5rem;
   font-size: 1.4rem;
+  font-family: var(--font-serif);
 }
 
 .proof-grid {
@@ -202,8 +217,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  background: rgba(212, 175, 55, 0.05);
+  padding: 1rem 1.25rem;
+  background: var(--gold-muted);
   border-left: 3px solid var(--gold);
   border-radius: 4px;
   flex-wrap: wrap;
@@ -212,8 +227,9 @@
 
 .fixture-callout p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: var(--fg);
+  font-family: var(--font-mono);
 }
 
 .policy-footer {
@@ -225,7 +241,9 @@
 .policy-footer h3 {
   font-size: 1rem;
   margin-bottom: 1rem;
-  color: var(--fg-muted);
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
 }
 
 .cannot-do-list {
@@ -238,6 +256,7 @@
   gap: 1.5rem;
   color: var(--error);
   font-size: 0.85rem;
+  font-family: var(--font-mono);
 }
 
 .cannot-do-list li {

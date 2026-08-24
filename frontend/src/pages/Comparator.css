@@ -1,7 +1,6 @@
 .comparator-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
 }
 
 .compare-controls {
@@ -23,6 +22,7 @@
 .select-col label {
   font-size: 0.8rem;
   color: var(--fg-muted);
+  font-family: var(--font-mono);
 }
 
 .select-col select {
@@ -31,7 +31,7 @@
 
 .swap-btn {
   padding: 0.5rem;
-  background: var(--bg-hover);
+  background: var(--bg-panel);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,40 +53,45 @@
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border);
+  font-family: var(--font-serif);
 }
 
 .comp-row {
   display: flex;
   flex-direction: column;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.comp-row:last-child {
-  border-bottom: none;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
 }
 
 .comp-label {
   font-size: 0.75rem;
-  color: var(--fg-muted);
-  margin-bottom: 0.25rem;
+  color: var(--fg-dim);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
 }
 
 .comp-val {
   font-size: 0.95rem;
-  font-weight: 500;
-  word-break: break-all;
+  color: var(--fg);
 }
 
-.comp-val.success {
-  color: var(--accent);
+.comp-card {
+  padding: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  margin-bottom: 1.5rem;
 }
 
-.comp-val.error {
-  color: var(--error);
+.diff-highlight {
+  border-left: 3px solid var(--gold);
 }
 
-@media (max-width: 900px) {
+.diff-match {
+  border-left: 3px solid var(--accent);
+}
+
+@media (max-width: 768px) {
   .compare-grid {
     grid-template-columns: 1fr;
   }
