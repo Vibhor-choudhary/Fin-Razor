@@ -5,6 +5,10 @@ import { TrustBadge } from './TrustBadge';
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   
+  if (location.pathname === '/story') {
+    return <>{children}</>;
+  }
+
   return (
     <div className="layout">
       <nav className="sidebar">
