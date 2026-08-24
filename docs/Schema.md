@@ -21,6 +21,7 @@ Represents a single synthetic checkout session.
 | `ground_truth_self_convert` | INTEGER | NOT NULL, DEFAULT 0 | Boolean; set by seed script — would session have converted without agent? |
 | `created_at` | TEXT | NOT NULL | ISO 8601 UTC timestamp |
 | `updated_at` | TEXT | NOT NULL | ISO 8601 UTC timestamp; updated on status change |
+| `scenario_label` | TEXT | NULLABLE | Simulation customer label: `retry_succeeds`, `retry_fails`, `nudge_converts`, `nudge_ignored` |
 
 **Indexes:**
 - `idx_sessions_final_status` on `final_status`
@@ -39,6 +40,7 @@ Individual payment lifecycle events within a session.
 | `type` | TEXT | NOT NULL | Event type: `initiated`, `failed`, `abandoned`, `succeeded` |
 | `timestamp` | TEXT | NOT NULL | ISO 8601 UTC timestamp of the event |
 | `metadata` | TEXT | NULLABLE | JSON blob; stores error codes, Hyperswitch payment IDs, etc. |
+| `raw_payload` | TEXT | NULLABLE | Full raw response JSON from external services for audit trailing |
 
 **Allowed `type` values:** `initiated` · `failed` · `abandoned` · `succeeded`
 

@@ -71,6 +71,12 @@ unresolvable_rate = (sessions marked "unresolvable" due to API/agent error) / (t
 - Used to verify the graceful failure scenario is captured correctly.
 - **Expected in demo:** ≥ 1 session ends up here intentionally.
 
+### 7. Total Modeled Recovery
+
+- **Verified Sandbox Recovery**: Revenue recovered via actual successful Hyperswitch sandbox retry payments.
+- **Simulated Nudge Recovery**: Revenue recovered via deterministic simulated customer behavior (nudge converts).
+- **Total Modeled Recovery**: Combined sum of verified sandbox payments and simulated modeled nudges.
+
 ---
 
 ## How Metrics Are Computed on Synthetic Batch
@@ -98,3 +104,11 @@ unresolvable_rate = (sessions marked "unresolvable" due to API/agent error) / (t
 | Unresolvable | — | 2 |
 
 *(Numbers above are illustrative targets, not hardcoded.)*
+
+---
+
+### Honesty Note (Sandbox Simulation)
+> [!IMPORTANT]
+> - **Real Sandbox Transactions:** All Hyperswitch payment creations, confirmations, decline handling, status updates, and raw API payloads are real sandbox transactions processed over the live Hyperswitch Sandbox API.
+> - **Simulation Limitations:** The 100-session dataset, customer responses to nudges, and retry outcome scenarios are programmatically simulated to evaluate bounded recovery agent behavior; they are not claims about actual production customer conversion rates.
+

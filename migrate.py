@@ -21,6 +21,7 @@ class Session(Base):
     ground_truth_self_convert = Column(Integer, nullable=False, default=0)
     created_at = Column(String, nullable=False)
     updated_at = Column(String, nullable=False)
+    scenario_label = Column(String, nullable=True)
 
 class Event(Base):
     __tablename__ = 'events'
@@ -29,6 +30,7 @@ class Event(Base):
     type = Column(String, nullable=False, index=True)
     timestamp = Column(String, nullable=False)
     metadata_json = Column('metadata', String, nullable=True)
+    raw_payload_json = Column('raw_payload', String, nullable=True)
 
 class Intervention(Base):
     __tablename__ = 'interventions'
