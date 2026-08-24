@@ -116,7 +116,7 @@ export function ErrorIntelligence() {
       <div className="default-deny-callout">
         {hasUnknown ? 
           'Unrecognized errors are not retried. They are recorded and abstained until intentionally allowlisted in code.' :
-          'No unknown error codes were observed in this current sandbox batch.'
+          'No unknown error codes observed in this sandbox batch. Default-deny remains active.'
         }
       </div>
 

@@ -47,7 +47,19 @@ export function GuardrailTracer() {
   }, [selectedId]);
 
   if (loadingList) return <div className="loader">Loading tracer...</div>;
-  if (sessions.length === 0) return <div className="error-state">No eligible sessions found.</div>;
+  if (sessions.length === 0) {
+    return (
+      <div className="panel empty-state-panel">
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>No Decision Records Available</h2>
+        <p style={{ color: 'var(--fg-muted)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
+          The guardrail tracer requires at least one recorded intervention or abstention to replay policy rules against stored evidence.
+        </p>
+        <Link to="/recovery-queue" className="btn">
+          View Recovery Queue
+        </Link>
+      </div>
+    );
+  }
 
   const { session, intervention } = detail || {};
   const isFixture = session?.id.includes('guardrail_test');

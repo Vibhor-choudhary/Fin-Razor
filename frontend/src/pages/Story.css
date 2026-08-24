@@ -758,6 +758,8 @@
   padding: 2rem;
   position: sticky;
   top: 2rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
 }
 
 .detail-card-head {

@@ -78,7 +78,19 @@ export function Comparator() {
   };
 
   if (loadingList) return <div className="loader">Loading comparator...</div>;
-  if (sessions.length < 2) return <div className="error-state">Need at least 2 eligible sessions to compare.</div>;
+  if (sessions.length < 2) {
+    return (
+      <div className="panel empty-state-panel">
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>Insufficient Comparison Sessions</h2>
+        <p style={{ color: 'var(--fg-muted)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
+          At least two decision-bearing sessions are required to perform a side-by-side policy differential analysis.
+        </p>
+        <Link to="/recovery-queue" className="btn">
+          View Recovery Queue
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="comparator-container slide-up">

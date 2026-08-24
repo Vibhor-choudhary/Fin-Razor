@@ -33,8 +33,20 @@ export function Replay() {
     return () => clearInterval(timer);
   }, [data]);
 
-  if (loading) return <div style={{ padding: '2rem' }}>Loading replay...</div>;
-  if (error || !data) return <div className="error-state">Error: {error || 'Session not found'}</div>;
+  if (loading) return <div className="loader">Loading replay...</div>;
+  if (error || !data) {
+    return (
+      <div className="panel empty-state-panel">
+        <h2 style={{ fontSize: '1.2rem', marginBottom: '0.75rem' }}>Session Replay Unavailable</h2>
+        <p style={{ color: 'var(--fg-muted)', maxWidth: '480px', margin: '0 auto 1.5rem', lineHeight: 1.5 }}>
+          {error ? 'Evidence could not be retrieved from the event store.' : 'The requested session record was not found in this sandbox batch.'}
+        </p>
+        <Link to="/recovery-queue" className="btn">
+          Return to Recovery Queue
+        </Link>
+      </div>
+    );
+  }
 
   const { session, events, intervention } = data;
   const isFixture = session.id.includes('guardrail_test');
