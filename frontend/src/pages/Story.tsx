@@ -64,9 +64,14 @@ export function Story() {
     containerRef: abstainContainerRef
   } = useGuidedTrace({ totalItems: 3, initialIndex: 1 });
 
+  const {
+    selectedIndex: selectedJourneyStage,
+    selectItem: setSelectedJourneyStage,
+    containerRef: journeyContainerRef
+  } = useGuidedTrace({ totalItems: 5, initialIndex: 2 });
+
   const [expandedMetricCol, setExpandedMetricCol] = useState<number | null>(null); // Inline expand
   const [selectedPolicyRule, setSelectedPolicyRule] = useState<number | null>(null);
-  const [selectedJourneyStage, setSelectedJourneyStage] = useState<number>(2); // Default to DC_08
   const [footerInView, setFooterInView] = useState<boolean>(false);
 
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -742,7 +747,7 @@ export function Story() {
                 </div>
 
                 {/* Grounded Node Evidence Inspection Panel */}
-                <div className="hero-node-evidence-box">
+                <div className="hero-node-evidence-box" key={selectedHeroNode}>
                   <div className="hero-evidence-top">
                     <span className="mono font-bold text-sm">
                       {heroVectorNodes[selectedHeroNode].title}
@@ -791,10 +796,14 @@ export function Story() {
             <div className="chip sandbox">HISTORICAL REPLAY · READ ONLY</div>
           </div>
 
-          <div className="wireframe-panel journey-panel">
+          <div className="wireframe-panel journey-panel" ref={journeyContainerRef as React.RefObject<HTMLDivElement>}>
             {/* Horizontal Dashed Guide Track (Desktop) */}
             <div className="journey-guide-track" aria-hidden="true">
               <div className="journey-dashed-line"></div>
+              <div
+                className="journey-progress-fill"
+                style={{ width: `${(selectedJourneyStage / 4) * 100}%` }}
+              ></div>
             </div>
 
             {/* Stages Grid */}
@@ -829,7 +838,7 @@ export function Story() {
             </div>
 
             {/* Selected Detail Drawer */}
-            <div className="journey-drawer-box" role="tabpanel">
+            <div className="journey-drawer-box" role="tabpanel" key={selectedJourneyStage}>
               <div className="drawer-top-line">
                 <span className="mono font-bold">{journeyStages[selectedJourneyStage].title}</span>
                 <span className="mono text-muted text-xs">STAGE {journeyStages[selectedJourneyStage].stage}</span>
@@ -907,7 +916,11 @@ export function Story() {
             </div>
 
             {/* Selected Phase Invariant Details */}
-            <div className="decision-phase-card" role="tabpanel">
+            <div
+              className={`decision-phase-card phase-${decisionSteps[selectedDecisionStep].stage}`}
+              role="tabpanel"
+              key={selectedDecisionStep}
+            >
               <div className="phase-card-header">
                 <div>
                   <span className="mono text-xs text-muted">
@@ -1038,6 +1051,20 @@ export function Story() {
                   className="orbit-ring-solid"
                 />
 
+                {/* Active connecting beam from selected token to focal card */}
+                {selectedOrbitToken === 0 && (
+                  <line x1="70" y1="120" x2="185" y2="120" stroke="#ef4444" strokeWidth="1.5" strokeDasharray="3 3" className="orbit-active-beam" />
+                )}
+                {selectedOrbitToken === 1 && (
+                  <line x1="250" y1="38" x2="250" y2="75" stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="3 3" className="orbit-active-beam" />
+                )}
+                {selectedOrbitToken === 2 && (
+                  <line x1="422" y1="120" x2="315" y2="120" stroke="#10b981" strokeWidth="1.5" strokeDasharray="3 3" className="orbit-active-beam" />
+                )}
+                {selectedOrbitToken === 3 && (
+                  <line x1="250" y1="215" x2="250" y2="165" stroke="#0f1419" strokeWidth="1.5" strokeDasharray="3 3" className="orbit-active-beam" />
+                )}
+
                 {/* Interactive Geometric Orbit Tokens */}
                 {/* Token 0: DC_08 (Left) */}
                 <g
@@ -1104,7 +1131,7 @@ export function Story() {
               </svg>
 
               {/* Dynamic Center Focal Evidence Box */}
-              <div className="orbit-center-card">
+              <div className="orbit-center-card" key={selectedOrbitToken}>
                 <span className={`chip ${orbitTokens[selectedOrbitToken].chipClass}`} style={{ marginBottom: '0.4rem' }}>
                   {orbitTokens[selectedOrbitToken].provenance}
                 </span>
@@ -1216,7 +1243,7 @@ export function Story() {
             </div>
 
             {/* Active Abstention Trace Details */}
-            <div className="abstention-trace-card" role="tabpanel">
+            <div className="abstention-trace-card" role="tabpanel" key={selectedAbstainStep}>
               <div className="trace-header">
                 <span className="mono font-bold text-sm">
                   {abstentionSteps[selectedAbstainStep].title}
