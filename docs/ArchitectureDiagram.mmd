@@ -1,0 +1,55 @@
+flowchart TD
+    subgraph VERCEL["☁️ Vercel Deployment"]
+        FE["🖥️ Frontend\nMerchant Console\nReact + TypeScript"]
+        BE["⚙️ Backend Service\nPython/FastAPI\nREST API + Agent Bridge"]
+    end
+
+    subgraph AGENT["🤖 Upsonic Agent"]
+        DETECT["Detection Engine\n(confidence scorer)"]
+        DECIDE["Decision Maker\n(retry / simplify / none)"]
+        GUARD["Guardrail Middleware\n(validates before write)"]
+    end
+
+    subgraph EXT["External Services"]
+        HS["💳 Hyperswitch Sandbox\nhttps://app.hyperswitch.io\nTest payments only"]
+        LOG["📋 Sentry\nStructured audit logs\n& error tracking"]
+    end
+
+    SEED["🌱 Synthetic Data Generator\nSeed script — generates N sessions\n& events with ground-truth labels"]
+
+    DB[("🗄️ Local DB\nSQLite / Postgres\nsessions, events,\ninterventions, metrics")]
+
+    %% User-facing flow
+    FE <-->|REST API calls| BE
+
+    %% Backend ↔ DB
+    BE <-->|read / write| DB
+
+    %% Seed → DB
+    SEED -->|populates| DB
+
+    %% Backend ↔ Hyperswitch
+    BE -->|POST /payments\n(test cards)| HS
+    HS -->|payment status\n(success / failed / declined)| BE
+
+    %% Backend ↔ Agent
+    BE -->|session context\n(events, cart_value,\nfailure_count)| DETECT
+    DETECT --> DECIDE
+    DECIDE --> GUARD
+    GUARD -->|validated decision| BE
+
+    %% Logging
+    BE -->|agent decisions\n& errors| LOG
+
+    %% Style
+    classDef vercel fill:#0070f3,color:#fff,stroke:#0070f3
+    classDef agent fill:#7c3aed,color:#fff,stroke:#7c3aed
+    classDef ext fill:#059669,color:#fff,stroke:#059669
+    classDef db fill:#b45309,color:#fff,stroke:#b45309
+    classDef seed fill:#6b7280,color:#fff,stroke:#6b7280
+
+    class FE,BE vercel
+    class DETECT,DECIDE,GUARD agent
+    class HS,LOG ext
+    class DB db
+    class SEED seed
