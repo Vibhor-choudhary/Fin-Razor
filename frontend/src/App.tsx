@@ -12,6 +12,7 @@ import { GuardrailTracer } from './pages/GuardrailTracer';
 import { PolicyAnalysis } from './pages/PolicyAnalysis';
 import { Comparator } from './pages/Comparator';
 import { Ledger } from './pages/Ledger';
+import { Story } from './pages/Story';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/policy-analysis" element={<PolicyAnalysis />} />
           <Route path="/compare" element={<Comparator />} />
           <Route path="/ledger" element={<Ledger />} />
+          <Route path="/story" element={<Story />} />
           <Route path="/architecture" element={<Architecture />} />
           <Route path="/audit-log" element={<AuditLog />} />
         </Routes>

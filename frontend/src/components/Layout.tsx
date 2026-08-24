@@ -44,6 +44,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Link to="/audit-log" className={`nav-item ${location.pathname === '/audit-log' ? 'active' : ''}`}>
           <ScrollText size={16} /> Audit Log
         </Link>
+        <Link to="/story" className={`nav-item ${location.pathname === '/story' ? 'active' : ''}`} style={{ color: 'var(--gold)', borderColor: location.pathname === '/story' ? 'var(--gold)' : 'transparent' }}>
+          <BookOpen size={16} style={{ color: 'var(--gold)' }} /> Recovery Story
+        </Link>
         
         <div style={{ marginTop: 'auto', paddingTop: '4rem', paddingLeft: '1rem', paddingRight: '1rem' }}>
           <TrustBadge />
