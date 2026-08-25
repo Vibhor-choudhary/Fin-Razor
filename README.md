@@ -114,6 +114,65 @@ The main route (`/`) serves as a Recovery Command Center. It aggregates historic
 - `/docs` - Documentation, schema, and API definitions
 - `/scripts` - Utilities for batch processing and real payment testing
 
+### Deployment & Operational Modes
+
+#### 1. Local Controlled Sandbox (`APP_ENV=development`)
+For local operator evaluation with real Hyperswitch sandbox execution enabled:
+- **Prerequisites:** Python 3.10+, Node.js 18+, Hyperswitch Sandbox credentials.
+- **Setup:**
+  ```bash
+  cp .env.example .env
+  # Set APP_ENV=development and configure HYPERSWITCH_API_KEY_TEST out-of-band
+  python migrate.py
+  python seed.py
+  uvicorn main:app --reload --port 8000
+  ```
+- In another terminal:
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
+- **Controlled Execution:** `/lab` test scenarios execute live sandbox payments on-demand, bounded by server rate limits and deterministic guardrails.
+
+---
+
+#### 2. Public Read-Only Demo (`APP_ENV=demo_readonly`)
+For public cloud deployments where viewers inspect historical evidence, audit records, and architecture:
+- **Backend Configuration:** Set `APP_ENV=demo_readonly`.
+- **Payment Credential Protection:** **Do NOT** configure or set `HYPERSWITCH_API_KEY_TEST`. The service starts normally and serves all historical audit/replay records.
+- **Safety Boundary:** All execution endpoints (`POST /api/lab/runs`) return `HTTP 403 Forbidden` with a controlled-mode notice before any payment client or network call is made.
+- **CORS Allowlist:** Set `CORS_ORIGINS` to the exact public frontend URL(s) (comma-separated, e.g. `https://your-app.vercel.app`).
+- **Health Verification:** Query `GET /health` to confirm `{"status": "ok", "environment": "demo_readonly", "database": "connected"}`.
+
+---
+
+#### 3. Render Deployment (Backend Service)
+Deploy the FastAPI backend as a Web Service on Render:
+- **Root Directory:** `./` (repository root)
+- **Environment:** Python
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- **Health Check Path:** `/health`
+- **Required Environment Variables:**
+  - `APP_ENV`: `demo_readonly`
+  - `CORS_ORIGINS`: `https://<your-vercel-domain>.vercel.app`
+  - `DATABASE_URL`: `sqlite:///./dev.db` (or managed PostgreSQL URL)
+
+---
+
+#### 4. Vercel Deployment (Frontend Console)
+Deploy the React single-page application on Vercel:
+- **Root Directory:** `frontend`
+- **Framework Preset:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Required Environment Variables:**
+  - `VITE_API_URL`: `https://<your-render-backend>.onrender.com`
+- **SPA Routing:** Configured via `frontend/vercel.json` rewrite rule to route all paths to `index.html`.
+
+---
+
 ### Limitations and next steps
 - **Sandbox Only:** Currently integrated strictly with test payment flows.
 - **Deterministic Simulation:** Customer outcomes (e.g., responding to nudges) are currently deterministically simulated.

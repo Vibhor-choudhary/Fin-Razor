@@ -4,15 +4,16 @@ import time
 import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, HTTPException, Depends, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 import sentry_sdk
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
-from sqlalchemy import create_engine, desc, func
+from sqlalchemy import create_engine, desc, func, text
 from sqlalchemy.orm import sessionmaker
-from migrate import Session as DbSession, Event, Intervention, MetricsSnapshot
+from migrate import Session as DbSession, Event, Intervention, MetricsSnapshot, Base
 from hyperswitch_client import HyperswitchClient
 from agent import RecoveryAgent, AgentDecision
 from guardrails import validate_decision
@@ -23,6 +24,9 @@ load_dotenv()
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///./dev.db")
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
+
+# Safely ensure required database schema exists without executing side-effect migrations or generating test data
+Base.metadata.create_all(bind=engine)
 
 def get_db():
     db = SessionLocal()
@@ -41,11 +45,25 @@ else:
         traces_sample_rate=1.0,
     )
 
-app = FastAPI()
+app = FastAPI(title="Checkout Recovery Agent API")
+
+# Configure CORS: parse comma-separated allowlist; fallback to documented local dev origins
+DEFAULT_CORS_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+
+cors_env = os.environ.get("CORS_ORIGINS", "")
+if cors_env.strip():
+    allowed_origins = [orig.strip() for orig in cors_env.split(",") if orig.strip()]
+else:
+    allowed_origins = DEFAULT_CORS_ORIGINS
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,8 +75,25 @@ class InterventionRequest(BaseModel):
     agent_reasoning: Optional[str] = None
 
 @app.get("/health")
-def health():
-    return {"status": "ok"}
+def health(db=Depends(get_db)):
+    """
+    Operational health check returning service status without exposing
+    secrets, payment keys, card data, or sensitive database records.
+    """
+    app_env = os.environ.get("APP_ENV", "development")
+    db_status = "connected"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "unavailable"
+    
+    is_healthy = db_status == "connected"
+    payload = {
+        "status": "ok" if is_healthy else "degraded",
+        "environment": app_env,
+        "database": db_status
+    }
+    return JSONResponse(status_code=200 if is_healthy else 503, content=payload)
 
 @app.get("/api/sessions")
 def get_sessions(
