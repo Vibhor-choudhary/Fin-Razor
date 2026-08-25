@@ -89,6 +89,11 @@ The **Recovery Lab** (`/lab`) provides a private, controlled operator interface 
 - `HYPERSWITCH_API_KEY_TEST` configured in `.env`
 - LLM Provider Key (Google Gemini / Groq) is optional; if absent or quota-limited, the system falls back gracefully to structured deterministic evaluation without failing the payment evidence flow.
 
+### Overview Dashboard (Evidence-Backed)
+The main route (`/`) serves as a Recovery Command Center. It aggregates historical evaluation evidence for bounded checkout recovery using strictly verified read-only API calls.
+- **Data Truth:** Categorically splits verified sandbox retries from simulated nudges. Never claims live revenue or forecast.
+- **Reference Pattern:** Uses a custom implementation of modern admin dashboard patterns (12-14px radii, pale panels, inline SVG charts) using original local React primitives, maintaining strict visual scope.
+
 ### Demo flow
 1. Run `python scripts/run_real_payment.py` to create a real sandbox success and decline.
 2. Run `python scripts/run_agent_batch.py` to execute the agent batch process.
