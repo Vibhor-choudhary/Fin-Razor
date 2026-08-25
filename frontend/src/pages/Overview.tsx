@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type Metrics, type Session, type Log } from '../lib/api';
-import { Funnel } from '../components/Funnel';
-import { EvidenceMetric } from '../components/EvidenceMetric';
-import { CohortComparison } from '../components/CohortComparison';
-import { OutcomeMix } from '../components/OutcomeMix';
-import { ValueAtRisk } from '../components/ValueAtRisk';
-import { RecentActivity } from '../components/RecentActivity';
 import './Overview.css';
 
 export function Overview() {
@@ -41,129 +35,132 @@ export function Overview() {
   if (!metrics) return null;
 
   return (
-    <div>
-      <div className="header">
-        <div>
-          <span className="doc-tree-eyebrow mono" style={{ marginBottom: '0.25rem', display: 'block' }}>CURRENT SANDBOX EVALUATION · HISTORICAL BATCH</span>
-          <h1 className="title" style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', margin: '0 0 0.5rem 0' }}>Recovery Command Center</h1>
-          <div className="methodology text-muted">
-            <strong>Historical evaluation evidence for bounded checkout recovery.</strong><br/>
-            Real sandbox payment rails. Simulated customer outcomes.
-          </div>
+    <div className="overview-container">
+      {/* ABOVE THE FOLD */}
+      <div className="hero-section">
+        <span className="eyebrow mono">CHECKOUT RECOVERY CONTROL</span>
+        <h1 className="hero-title">Recover failed checkouts with confidence.</h1>
+        <p className="hero-subtitle">
+          Review at-risk sessions, apply only permitted actions, and keep every decision inspectable.
+        </p>
+        
+        <div className="hero-actions">
+          <Link to="/recovery-queue" className="btn-primary-large">Review recovery queue</Link>
+          <Link to="/lab" className="link-secondary">Run a controlled test →</Link>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
-          <div className="chip sandbox">SANDBOX SIMULATION</div>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Link to="/policy" className="btn-outline">Inspect policy</Link>
-            <Link to="/lab" className="btn-primary">Run controlled test</Link>
-          </div>
+
+        <div className="business-value-block">
+          <div className="value-label">Recovery opportunity</div>
+          <div className="value-metric">₹{metrics.total_modeled_recovered_amount.toLocaleString()}</div>
+          <div className="value-provenance mono">Total modeled recovery (verified + simulated)</div>
         </div>
       </div>
 
-      <div className="dashboard-grid">
-        <div className="metric-strip">
-          <EvidenceMetric 
-            label="Verified sandbox retry recovery" 
-            value={`₹${metrics.verified_sandbox_recovered_amount.toLocaleString()}`} 
-            highlight
-          />
-          <EvidenceMetric 
-            label="Simulated nudge recovery" 
-            value={`₹${metrics.simulated_nudge_recovered_amount.toLocaleString()}`} 
-          />
-          <EvidenceMetric 
-            label="Total modeled recovery" 
-            value={`₹${metrics.total_modeled_recovered_amount.toLocaleString()}`} 
-          />
-          <EvidenceMetric 
-            label="Conversion Lift" 
-            value={`${metrics.recovery_lift > 0 ? '+' : ''}${(metrics.recovery_lift * 100).toFixed(1)} pp`}
-            subtitle={`Baseline: ${(metrics.baseline_conversion * 100).toFixed(1)}% → Agent: ${(metrics.agent_conversion * 100).toFixed(1)}%`}
-          />
-          <EvidenceMetric 
-            label="False-Positive Cost" 
-            value={`₹${metrics.false_positive_cost_inr.toFixed(2)}`}
-            subtitle={`${metrics.false_positives} interventions on self-converts`}
-            alert={metrics.false_positive_cost_inr > 0}
-          />
-          <EvidenceMetric 
-            label="Guardrail Abstentions" 
-            value={`${metrics.abstentions}`}
-            subtitle={`${(metrics.abstain_rate * 100).toFixed(1)}% of evaluated sessions`}
-          />
-        </div>
-
-        <div className="two-col-row">
-          <CohortComparison 
-            controlConversion={metrics.baseline_conversion} 
-            agentConversion={metrics.agent_conversion} 
-            lift={metrics.recovery_lift} 
-          />
-          <div className="admin-panel lifecycle-panel" style={{ padding: '0 1.5rem 1.5rem 1.5rem' }}>
-            <div className="panel-header" style={{ paddingTop: '1.5rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-subtle)' }}>
-              <h3 className="panel-title">Recovery Lifecycle</h3>
-              <span className="panel-subtitle mono">HISTORICAL BATCH</span>
+      {/* BELOW THE FOLD */}
+      <div className="editorial-sections">
+        
+        {/* Section 1: What recovery changes */}
+        <section className="editorial-section">
+          <h2>What recovery changes</h2>
+          <div className="cohort-inline-comparison">
+            <div className="cohort-row">
+              <span className="cohort-label mono">Control</span>
+              <span className="cohort-pct">{(metrics.baseline_conversion * 100).toFixed(1)}%</span>
             </div>
-            <Funnel />
+            <div className="cohort-row">
+              <span className="cohort-label mono">Agent</span>
+              <span className="cohort-pct text-green">{(metrics.agent_conversion * 100).toFixed(1)}%</span>
+            </div>
+            <div className="cohort-diff mono">
+              Difference: {metrics.recovery_lift > 0 ? '+' : ''}{(metrics.recovery_lift * 100).toFixed(1)} pp
+            </div>
           </div>
-        </div>
+          <p className="section-note">Recorded sandbox evaluation—not a production forecast.</p>
+        </section>
 
-        <div className="two-col-row">
-          <OutcomeMix sessions={sessions} metrics={metrics} />
-          <ValueAtRisk metrics={metrics} sessions={sessions} />
-        </div>
+        {/* Section 2: How every action stays controlled */}
+        <section className="editorial-section">
+          <h2>How every action stays controlled</h2>
+          <div className="lifecycle-statements">
+            <span className="statement">Detect</span>
+            <span className="arrow">→</span>
+            <span className="statement">Evaluate</span>
+            <span className="arrow">→</span>
+            <span className="statement">Permit or abstain</span>
+            <span className="arrow">→</span>
+            <span className="statement">Record outcome</span>
+          </div>
+          <Link to="/policy" className="link-secondary">Read the policy →</Link>
+        </section>
 
-        <div className="two-col-row">
-          <RecentActivity logs={recentLogs} />
-          
-          <div className="admin-panel sessions-panel">
-            <div className="panel-header">
-              <h3 className="panel-title">Existing recent at-risk sessions</h3>
-              <span className="panel-subtitle mono">Sandbox simulation data</span>
-            </div>
-            
-            <div className="table-responsive" style={{ overflowX: 'auto', margin: '0 -1.5rem' }}>
-              {sessions.length === 0 ? (
-                <div style={{ padding: '2rem' }} className="mono text-muted">No recent sessions.</div>
-              ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                      <th style={{ padding: '0.75rem 1.5rem' }}>Session ID</th>
-                      <th style={{ padding: '0.75rem 1.5rem' }}>Cart Value</th>
-                      <th style={{ padding: '0.75rem 1.5rem' }}>Final Status</th>
-                      <th style={{ padding: '0.75rem 1.5rem' }}>Action</th>
+        {/* Section 3: Recent decisions */}
+        <section className="editorial-section">
+          <h2>Recent decisions</h2>
+          <div className="recent-decisions-list">
+            {recentLogs.length === 0 ? (
+              <div className="mono text-muted py-4">Evidence unavailable</div>
+            ) : (
+              recentLogs.slice(0, 5).map((log, i) => (
+                <div key={i} className="decision-row">
+                  <div className="decision-info">
+                    <span className="mono decision-id">{log.session_id}</span>
+                    <span className="decision-outcome">
+                      {log.outcome === 'succeeded' ? (
+                         <span className="text-green">Succeeded</span>
+                      ) : log.outcome === 'abstained' ? (
+                         <span className="text-muted">Abstained</span>
+                      ) : (
+                         <span className="text-red">Failed</span>
+                      )}
+                    </span>
+                    <span className="decision-provenance mono text-muted">{log.type}</span>
+                  </div>
+                  <Link to={`/replay/${log.session_id}`} className="link-secondary">View evidence</Link>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        {/* Existing At-Risk Sessions Table */}
+        <section className="editorial-section subdued-section">
+          <h3 className="subdued-heading">Sessions needing review</h3>
+          <div className="table-responsive">
+            {sessions.length === 0 ? (
+              <div className="mono text-muted py-4">No recent sessions.</div>
+            ) : (
+              <table className="clean-table">
+                <thead>
+                  <tr>
+                    <th>Session ID</th>
+                    <th>Cart Value</th>
+                    <th>Final Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map(s => (
+                    <tr key={s.id}>
+                      <td className="mono">{s.id}</td>
+                      <td>₹{s.cart_value}</td>
+                      <td>
+                        <span className={`status-text ${s.final_status === 'succeeded' ? 'text-green' : 'text-red'}`}>
+                          {s.final_status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="table-actions">
+                          <Link to={`/sessions/${s.id}`} className="link-secondary">View</Link>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {sessions.map(s => (
-                      <tr key={s.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                        <td className="mono" style={{ padding: '0.75rem 1.5rem' }}>{s.id}</td>
-                        <td style={{ padding: '0.75rem 1.5rem' }}>₹{s.cart_value}</td>
-                        <td style={{ padding: '0.75rem 1.5rem' }}>
-                          <span className={`chip mono text-xs ${s.final_status === 'succeeded' ? 'chip-green' : 'chip-neutral'}`}>
-                            {s.final_status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td style={{ padding: '0.75rem 1.5rem' }}>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <Link to={`/sessions/${s.id}`} className="btn-outline text-xs">View</Link>
-                            {s.intervention_type && (
-                              <Link to={`/replay/${s.id}`} className="btn-primary text-xs">Replay</Link>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-            <div className="panel-footer" style={{ padding: '1rem 0 0 0', margin: 'auto 0 0 0' }}>
-              <Link to="/recovery-queue" className="btn-ghost text-xs">View all sessions</Link>
-            </div>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-        </div>
+        </section>
+
       </div>
     </div>
   );
