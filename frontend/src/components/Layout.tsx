@@ -13,7 +13,8 @@ import {
   BookOpen,
   Menu,
   X,
-  ArrowUpRight
+  ArrowUpRight,
+  FlaskConical
 } from 'lucide-react';
 import { TrustBadge } from './TrustBadge';
 
@@ -75,6 +76,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             aria-current={location.pathname === '/recovery-queue' ? 'page' : undefined}
           >
             <ListFilter size={14} /> Recovery Queue
+          </Link>
+          <Link
+            to="/lab"
+            onClick={closeMenu}
+            className={`nav-item ${location.pathname === '/lab' ? 'active' : ''}`}
+            aria-current={location.pathname === '/lab' ? 'page' : undefined}
+          >
+            <FlaskConical size={14} /> Recovery Lab
           </Link>
           <Link
             to="/audit-log"

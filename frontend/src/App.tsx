@@ -13,6 +13,7 @@ import { PolicyAnalysis } from './pages/PolicyAnalysis';
 import { Comparator } from './pages/Comparator';
 import { Ledger } from './pages/Ledger';
 import { Story } from './pages/Story';
+import { Lab } from './pages/Lab';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Overview />} />
           <Route path="/recovery-queue" element={<Queue />} />
+          <Route path="/lab" element={<Lab />} />
           <Route path="/sessions/:id" element={<SessionDetail />} />
           <Route path="/replay/:id" element={<Replay />} />
           <Route path="/error-intelligence" element={<ErrorIntelligence />} />

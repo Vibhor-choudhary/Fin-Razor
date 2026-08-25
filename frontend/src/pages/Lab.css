@@ -1,0 +1,476 @@
+/* =========================================================================
+   RECOVERY LAB — CONTROLLED SANDBOX OPERATOR TEST HARNESS STYLING
+   ========================================================================= */
+
+.lab-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 5rem;
+}
+
+/* Header */
+.lab-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1.5rem;
+}
+
+.lab-header-left {
+  max-width: 720px;
+}
+
+.lab-title {
+  font-family: var(--font-serif, 'Georgia', serif);
+  font-size: 2.2rem;
+  line-height: 1.15;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin: 0.35rem 0 0.5rem 0;
+}
+
+.lab-description {
+  font-size: 0.95rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.lab-env-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  background-color: var(--bg-panel);
+}
+
+.lab-env-badge.local-enabled {
+  border-color: var(--border);
+  color: var(--fg);
+}
+
+.lab-env-badge.read-only {
+  border-color: rgba(245, 158, 11, 0.4);
+  background-color: var(--gold-muted);
+  color: var(--fg);
+}
+
+/* Readonly & Error Notices */
+.lab-readonly-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background-color: var(--gold-muted);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-sm);
+  margin-bottom: 2rem;
+  color: var(--fg);
+}
+
+.lab-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  margin-bottom: 2rem;
+  color: var(--fg);
+}
+
+/* Configuration Grid */
+.lab-config-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.75rem;
+  margin-bottom: 2.5rem;
+  align-items: start;
+}
+
+.lab-config-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.card-section-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.card-section-tag {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--fg-dim);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.card-section-heading {
+  font-family: var(--font-serif, 'Georgia', serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin: 0 0 0.35rem 0;
+  color: var(--fg);
+}
+
+.card-section-sub {
+  font-size: 0.82rem;
+  color: var(--fg-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Scenario List & Cards */
+.lab-scenarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lab-scenario-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  transition: border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lab-scenario-card:hover {
+  border-color: #808080;
+}
+
+.lab-scenario-card.selected {
+  border-color: var(--fg);
+  border-left-width: 3px;
+  box-shadow: 0 4px 14px rgba(15, 20, 25, 0.05);
+}
+
+.scenario-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.scenario-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scenario-marker-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background-color: transparent;
+  transition: all 200ms ease;
+}
+
+.lab-scenario-card.selected .scenario-marker-dot {
+  border-color: var(--fg);
+  background-color: var(--fg);
+}
+
+.scenario-label {
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+
+.scenario-desc {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--fg-muted);
+  margin: 0.2rem 0 0.4rem 0;
+}
+
+.scenario-posture-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.posture-tag {
+  color: var(--fg-dim);
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.posture-val {
+  color: var(--fg);
+  font-size: 0.72rem;
+}
+
+/* Controls & Amount Box */
+.lab-controls-card {
+  background-color: var(--bg-panel);
+}
+
+.lab-amount-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.amount-label {
+  color: var(--fg-dim);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
+.amount-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.currency-prefix {
+  font-size: 1.6rem;
+  color: var(--fg-muted);
+}
+
+.lab-amount-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  color: var(--fg);
+  outline: none;
+  font-family: var(--font-mono);
+  padding: 0;
+}
+
+.amount-helper {
+  font-size: 0.68rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.lab-summary-spec {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lab-action-row {
+  margin-top: 0.5rem;
+}
+
+.lab-run-btn {
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.9rem;
+  border-radius: 9999px;
+  gap: 0.6rem;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.lab-safety-footnote {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+  line-height: 1.4;
+}
+
+/* 3. Result Dossier */
+.lab-result-dossier {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 2rem;
+  margin-top: 2rem;
+  animation: smoothFadeSlide 340ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.dossier-header-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dossier-heading {
+  font-family: var(--font-serif, 'Georgia', serif);
+  font-size: 1.75rem;
+  margin: 0.25rem 0 0 0;
+  font-weight: 500;
+}
+
+.dossier-badge-cluster {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.dossier-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dossier-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.card-stage-num {
+  font-size: 0.65rem;
+  color: var(--fg-dim);
+}
+
+.dossier-card-tag {
+  font-size: 0.65rem;
+  color: var(--fg-muted);
+  letter-spacing: 0.04em;
+}
+
+.dossier-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--fg);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.4rem;
+}
+
+.dossier-evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+}
+
+.evidence-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.evidence-key {
+  color: var(--fg-muted);
+  flex-shrink: 0;
+}
+
+.evidence-val {
+  color: var(--fg);
+  text-align: right;
+  word-break: break-all;
+}
+
+.evidence-rationale {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.rationale-p {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--fg);
+}
+
+.dossier-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dossier-links-cluster {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .dossier-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .lab-config-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dossier-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  .lab-result-dossier,
+  .lab-scenario-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}

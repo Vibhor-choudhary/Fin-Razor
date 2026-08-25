@@ -70,10 +70,30 @@ To view the architecture diagram locally, you can use any Mermaid viewer (like t
    npm run dev
    ```
 
+### Recovery Lab (Controlled Sandbox Test Harness)
+The **Recovery Lab** (`/lab`) provides a private, controlled operator interface to execute real Hyperswitch sandbox scenarios on demand, inspect live payment failure telemetry, evaluate deterministic guardrail enforcement, and open the resulting Replay/Audit record.
+
+#### Controlled Local Execution vs. Public Read-Only Demo
+- **Controlled Local Sandbox Execution (`APP_ENV=development`):** Operators select from an allowlist of server-side test profiles, trigger real payment requests to Hyperswitch Sandbox, observe live rail statuses/error codes, and trigger the agent + guardrail pipeline with exactly one permitted intervention limit.
+- **Public Read-Only Evidence Demo (`APP_ENV=demo_readonly`):** All execution endpoints (`POST /api/lab/runs`) return HTTP 403 Forbidden. The web interface acts strictly as a read-only audit and product narrative console.
+
+#### Security & Safety Boundary
+1. **Server-Side Secret & Card Ownership:** The frontend never receives, displays, or inputs payment card numbers, client secrets, API keys, or raw payloads.
+2. **Server-Controlled Allowlist:** Only predefined scenario IDs (`success`, `card_declined`, `insufficient_funds`, `lost_card`, `stolen_card`, `three_ds_success`) are accepted.
+3. **Strict Validation:** Order amount is bounded (₹10 – ₹5,000) and converted to paise exclusively on the server.
+4. **Deterministic Invariants:** One safe action maximum per session; amount equality invariant strictly enforced during retries.
+5. **In-Process Rate Limiting:** Local sandbox executions are capped at 5 runs per 10 minutes.
+
+#### Local Run Prerequisites
+- `APP_ENV=development`
+- `HYPERSWITCH_API_KEY_TEST` configured in `.env`
+- LLM Provider Key (Google Gemini / Groq) is optional; if absent or quota-limited, the system falls back gracefully to structured deterministic evaluation without failing the payment evidence flow.
+
 ### Demo flow
 1. Run `python scripts/run_real_payment.py` to create a real sandbox success and decline.
 2. Run `python scripts/run_agent_batch.py` to execute the agent batch process.
-3. Open the Merchant Console (default: `http://localhost:5173`) and view the **Overview**, **Recovery Queue**, **Session Detail**, and **Audit Log** tabs.
+3. Open the Merchant Console (`http://localhost:5173`) and navigate to **Recovery Lab** (`/lab`) to execute live test profiles.
+4. View **Overview**, **Recovery Queue**, **Replay**, and **Audit Log** tabs.
 
 ### Metrics definitions
 - **Verified Sandbox Retry Recovery:** Revenue recovered via actual successful Hyperswitch sandbox retry payments.

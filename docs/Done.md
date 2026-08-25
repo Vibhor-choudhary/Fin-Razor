@@ -76,6 +76,28 @@ A feature or the project as a whole is considered **done** only when every item 
 
 ---
 
+## Recovery Lab (Sandbox Execution Harness)
+
+- [x] **Lab Backend Endpoints**
+  - [x] `GET /api/lab/scenarios` returns sanitized allowlist without payment secrets or card numbers.
+  - [x] `POST /api/lab/runs` dispatches real Hyperswitch sandbox requests and returns structured dossier.
+  - [x] Rate limiting active (max 5 runs per 10 min window).
+  - [x] Bounded input validation (₹10 – ₹5,000 range check returning 422).
+  - [x] Missing `HYPERSWITCH_API_KEY_TEST` returns 503.
+  - [x] Public read-only deployment gate (`APP_ENV=demo_readonly`) returns 403.
+- [x] **Lab Safety Invariants**
+  - [x] Zero payment secrets or card numbers delivered to frontend.
+  - [x] One safe action maximum per session strictly enforced.
+  - [x] Retry amount equality invariant preserved.
+  - [x] Replay link (`/replay/:id`) and Audit Log entry created for every run.
+- [x] **Lab Frontend UX**
+  - [x] `/lab` route accessible in sidebar under `OPERATE`.
+  - [x] Light monochrome editorial console styling with accessible focus states.
+  - [x] Progress indicator states during execution.
+  - [x] Dossier reveals real payment status, agent proposal, policy evaluation, and outcome provenance.
+
+---
+
 ## Deployment
 
 - [ ] **`.env.example` committed** with all required variable names (no values).

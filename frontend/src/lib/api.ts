@@ -82,6 +82,60 @@ export interface Log {
   details: string;
 }
 
+export interface LabScenario {
+  id: string;
+  label: string;
+  description: string;
+  expected_class: 'success' | 'terminal_failure' | 'customer_action' | string;
+  policy_posture: string;
+}
+
+export interface LabScenariosResponse {
+  environment: string;
+  read_only: boolean;
+  scenarios: LabScenario[];
+}
+
+export interface LabRunRequest {
+  scenario_id: string;
+  amount_inr: number;
+}
+
+export interface LabRunResponse {
+  run_id: string;
+  session_id: string;
+  initial_payment: {
+    payment_id: string;
+    status: string;
+    error_code: string | null;
+    error_message: string | null;
+  };
+  agent: {
+    available: boolean;
+    proposal: 'retry' | 'nudge' | 'none' | null;
+    confidence: number | null;
+    reasoning: string | null;
+  };
+  guardrail: {
+    result: 'allowed' | 'blocked' | 'not_evaluated';
+    reason: string;
+  };
+  bounded_action: {
+    type: 'retry' | 'nudge' | 'none' | 'abstain';
+    executed: boolean;
+    one_action_limit: number;
+  };
+  final_outcome: {
+    status: string;
+    payment_id: string | null;
+    provenance: 'sandbox_verified' | 'simulated_outcome' | 'no_action';
+  };
+  links: {
+    replay: string;
+    audit: string;
+  };
+}
+
 export const api = {
   getSessions: async (params?: Record<string, string>): Promise<{ data_mode: string, sessions: Session[], total: number }> => {
     const qs = params ? '?' + new URLSearchParams(params).toString() : '';
@@ -109,6 +163,27 @@ export const api = {
     return res.json();
   },
 
+  getLabScenarios: async (): Promise<LabScenariosResponse> => {
+    const res = await fetch(`${API_URL}/api/lab/scenarios`);
+    if (!res.ok) throw new Error('Failed to fetch lab scenarios');
+    return res.json();
+  },
+
+  runLabScenario: async (payload: LabRunRequest): Promise<LabRunResponse> => {
+    const res = await fetch(`${API_URL}/api/lab/runs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to execute lab run' }));
+      throw new Error(err.detail || 'Lab execution failed');
+    }
+    return res.json();
+  },
+
   // Paginates through all sessions since backend caps limit at 100
   getAllSessions: async (filterParams?: Record<string, string>): Promise<Session[]> => {
     const PAGE = 100;
@@ -128,3 +203,4 @@ export const api = {
     return all;
   },
 };
+
