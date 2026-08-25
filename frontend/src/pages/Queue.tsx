@@ -106,8 +106,12 @@ export function Queue() {
                 return (
                   <tr key={s.id}>
                     <td className="mono">
-                      {s.id.slice(0, 13)}...
-                      {s.id.includes('guardrail_test') && <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>TEST FIXTURE · FRESHNESS RULE</div>}
+                      {s.id.startsWith('demo_') ? s.id : `${s.id.slice(0, 13)}...`}
+                      {s.id.startsWith('demo_') ? (
+                        <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>SIMULATED DEMO DATA</div>
+                      ) : s.id.includes('guardrail_test') ? (
+                        <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>TEST FIXTURE · FRESHNESS RULE</div>
+                      ) : null}
                     </td>
                     <td>₹{s.cart_value}</td>
                     <td>

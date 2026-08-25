@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -14,13 +14,28 @@ import {
   Menu,
   X,
   ArrowUpRight,
-  FlaskConical
+  FlaskConical,
+  Lock
 } from 'lucide-react';
 import { TrustBadge } from './TrustBadge';
+import { api } from '../lib/api';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(false);
+
+  useEffect(() => {
+    async function checkEnv() {
+      try {
+        const res = await api.getLabScenarios();
+        setIsReadOnly(res.read_only);
+      } catch (e) {
+        // Safe fallback
+      }
+    }
+    checkEnv();
+  }, []);
 
   // If on the Story page, render full standalone light-mode storyboard canvas
   if (location.pathname === '/story') {
@@ -179,7 +194,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
-      <main className="main-content">{children}</main>
+      <main className="main-content">
+        {isReadOnly && (
+          <div className="demo-readonly-banner" role="status" aria-label="Public Demo Notice">
+            <div className="demo-readonly-badge mono">
+              <Lock size={12} style={{ marginRight: '0.35rem' }} />
+              PUBLIC DEMO · READ ONLY
+            </div>
+            <div className="demo-readonly-text">
+              SIMULATED DEMO DATA · No new payments or interventions can be executed here.
+            </div>
+          </div>
+        )}
+        {children}
+      </main>
     </div>
   );
 }

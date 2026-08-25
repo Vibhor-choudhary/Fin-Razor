@@ -18,6 +18,7 @@ from hyperswitch_client import HyperswitchClient
 from agent import RecoveryAgent, AgentDecision
 from guardrails import validate_decision
 from interventions import execute_intervention
+from demo_dataset import init_demo_dataset
 
 load_dotenv()
 
@@ -27,6 +28,9 @@ SessionLocal = sessionmaker(bind=engine)
 
 # Safely ensure required database schema exists without executing side-effect migrations or generating test data
 Base.metadata.create_all(bind=engine)
+
+# Seed synthetic read-only demo fixtures only when APP_ENV=demo_readonly (idempotent, never runs in development)
+init_demo_dataset(engine)
 
 def get_db():
     db = SessionLocal()
@@ -129,6 +133,14 @@ def get_sessions(
                 latest_error_code = meta.get("error_code")
             except:
                 pass
+        if not latest_error_code:
+            failed_evt = db.query(Event).filter(Event.session_id == s.id, Event.type == "failed").order_by(desc(Event.timestamp)).first()
+            if failed_evt and failed_evt.metadata_json:
+                try:
+                    meta = json.loads(failed_evt.metadata_json)
+                    latest_error_code = meta.get("error_code")
+                except:
+                    pass
                 
         sessions_out.append({
             "id": s.id,
@@ -163,12 +175,15 @@ def get_session(session_id: str, db=Depends(get_db)):
     intervention = db.query(Intervention).filter(Intervention.session_id == session_id).first()
     
     events_out = []
+    session_latest_error = None
     for e in events:
         has_raw = bool(e.raw_payload_json and e.raw_payload_json != "null")
         meta = {}
         if e.metadata_json:
             try:
                 meta = json.loads(e.metadata_json)
+                if meta.get("error_code"):
+                    session_latest_error = meta.get("error_code")
             except:
                 pass
         events_out.append({
@@ -192,7 +207,8 @@ def get_session(session_id: str, db=Depends(get_db)):
             "initial_status": db_session.initial_status,
             "final_status": db_session.final_status,
             "at_risk": bool(db_session.at_risk),
-            "created_at": db_session.created_at
+            "created_at": db_session.created_at,
+            "latest_error_code": session_latest_error
         },
         "events": events_out,
         "intervention": {

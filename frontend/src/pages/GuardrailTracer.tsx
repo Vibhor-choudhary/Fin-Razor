@@ -18,7 +18,7 @@ export function GuardrailTracer() {
         const eligible = sRes.filter(s => s.intervention_type);
         setSessions(eligible);
         if (eligible.length > 0) {
-          const fixture = eligible.find(s => s.id.includes('guardrail_test'));
+          const fixture = eligible.find(s => s.id.includes('guardrail_test') || s.id.includes('insufficient_funds') || s.id.includes('lost_card') || s.intervention_type === 'abstain');
           setSelectedId(fixture ? fixture.id : eligible[0].id);
         }
       } catch (e) {

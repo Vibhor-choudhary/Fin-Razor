@@ -49,7 +49,11 @@ export function SessionDetail() {
         <div>
           <h1 className="title" style={{ fontSize: '1.5rem' }}>
             Session <span className="mono">{session.id}</span>
-            {session.id.includes('guardrail_test') && <div style={{fontSize: '0.85rem', color: 'var(--warning)', marginTop: 8}}>TEST FIXTURE · FRESHNESS RULE</div>}
+            {session.id.startsWith('demo_') ? (
+              <div style={{fontSize: '0.85rem', color: 'var(--warning)', marginTop: 8}}>SIMULATED DEMO DATA</div>
+            ) : session.id.includes('guardrail_test') ? (
+              <div style={{fontSize: '0.85rem', color: 'var(--warning)', marginTop: 8}}>TEST FIXTURE · FRESHNESS RULE</div>
+            ) : null}
           </h1>
           <div className="methodology" style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>
             Sandbox simulation — real Hyperswitch payment rails; simulated customer outcomes.

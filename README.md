@@ -140,6 +140,8 @@ For local operator evaluation with real Hyperswitch sandbox execution enabled:
 #### 2. Public Read-Only Demo (`APP_ENV=demo_readonly`)
 For public cloud deployments where viewers inspect historical evidence, audit records, and architecture:
 - **Backend Configuration:** Set `APP_ENV=demo_readonly`.
+- **Synthetic Demo Dataset:** The service idempotently seeds 7 deterministic read-only demo records (`demo_session_*`) on startup if not already present, ensuring full coverage across Overview, Recovery Queue, Audit Log, Guardrail Tracer, Replay, Policy Analysis, Compare Sessions, and Recovery Ledger without manual seeding.
+- **Ephemeral Storage Resilience:** On Render with ephemeral SQLite disk storage, demo records are safely recreated on service restart only in `demo_readonly`.
 - **Payment Credential Protection:** **Do NOT** configure or set `HYPERSWITCH_API_KEY_TEST`. The service starts normally and serves all historical audit/replay records.
 - **Safety Boundary:** All execution endpoints (`POST /api/lab/runs`) return `HTTP 403 Forbidden` with a controlled-mode notice before any payment client or network call is made.
 - **CORS Allowlist:** Set `CORS_ORIGINS` to the exact public frontend URL(s) (comma-separated, e.g. `https://your-app.vercel.app`).

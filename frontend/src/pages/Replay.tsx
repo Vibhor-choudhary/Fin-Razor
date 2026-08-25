@@ -123,8 +123,11 @@ export function Replay() {
           </h1>
           <div style={{ marginTop: '0.2rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <span className={`chip ${badgeClass}`} style={{ fontSize: '0.7rem' }}>{badgeLabel}</span>
-            <span className="mono" style={{ fontSize: '0.8rem' }}>Cart: ₹{session.cart_value}</span>
-            {isFixture && <span className="chip provenance-abstained" style={{ fontSize: '0.7rem' }}>TEST FIXTURE · FRESHNESS RULE</span>}
+            {session.id.startsWith('demo_') ? (
+              <span className="chip provenance-abstained" style={{ fontSize: '0.7rem' }}>SIMULATED DEMO DATA</span>
+            ) : isFixture ? (
+              <span className="chip provenance-abstained" style={{ fontSize: '0.7rem' }}>TEST FIXTURE · FRESHNESS RULE</span>
+            ) : null}
           </div>
         </div>
         {step >= 5 && <div className="replay-complete-badge">Replay Complete</div>}

@@ -65,8 +65,12 @@ export function AuditLog() {
                     <span className="chip">{log.type}</span>
                   </td>
                   <td className="mono">
-                    {log.session_id.slice(0, 13)}...
-                    {log.session_id.includes('guardrail_test') && <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>TEST FIXTURE · FRESHNESS RULE</div>}
+                    {log.session_id.startsWith('demo_') ? log.session_id : `${log.session_id.slice(0, 13)}...`}
+                    {log.session_id.startsWith('demo_') ? (
+                      <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>SIMULATED DEMO DATA</div>
+                    ) : log.session_id.includes('guardrail_test') ? (
+                      <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>TEST FIXTURE · FRESHNESS RULE</div>
+                    ) : null}
                   </td>
                   <td className="mono" style={{ color: 'var(--fg-muted)' }}>{log.id.slice(0, 10)}...</td>
                   <td style={{ fontSize: '0.85rem' }}>

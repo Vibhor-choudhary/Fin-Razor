@@ -23,7 +23,7 @@ export function Comparator() {
         
         if (eligible.length > 0) {
           const recovered = eligible.find(s => s.intervention_status === 'succeeded' && s.intervention_type === 'retry');
-          const fixture = eligible.find(s => s.id.includes('guardrail_test'));
+          const fixture = eligible.find(s => s.id.includes('guardrail_test') || s.id.includes('insufficient_funds') || s.id.includes('lost_card') || s.intervention_type === 'abstain');
           
           if (recovered && fixture) {
             setSelectedA(recovered.id);

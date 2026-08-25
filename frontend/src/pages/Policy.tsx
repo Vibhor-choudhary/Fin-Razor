@@ -16,7 +16,7 @@ export function Policy() {
         setMetrics(m);
         // Attempt to find the freshness fixture
         const sRes = await api.getSessions({ limit: '100' });
-        const fixture = sRes.sessions.find((s: Session) => s.id.includes('guardrail_test'));
+        const fixture = sRes.sessions.find((s: Session) => s.id.includes('guardrail_test') || s.id === 'demo_session_insufficient_funds' || s.id === 'demo_session_lost_card');
         if (fixture) setFixtureId(fixture.id);
       } catch (e) {
         console.error(e);
