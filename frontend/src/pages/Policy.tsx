@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { api, type Metrics, type Session } from '../lib/api';
+import { api, type Metrics } from '../lib/api';
+import { PageHeader } from '../components/PageHeader';
+import { ProvenanceChip } from '../components/ProvenanceChip';
+import { ShieldAlert, AlertTriangle, Scale, Clock, Hourglass, Lock, Coins } from 'lucide-react';
 import './Policy.css';
-import { ShieldAlert, AlertTriangle, Scale, Clock, Hourglass, Lock, Coins, CheckCircle2 } from 'lucide-react';
 
 export function Policy() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [fixtureId, setFixtureId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -14,10 +14,6 @@ export function Policy() {
       try {
         const m = await api.getMetrics();
         setMetrics(m);
-        // Attempt to find the freshness fixture
-        const sRes = await api.getSessions({ limit: '100' });
-        const fixture = sRes.sessions.find((s: Session) => s.id.includes('guardrail_test') || s.id === 'demo_session_insufficient_funds' || s.id === 'demo_session_lost_card');
-        if (fixture) setFixtureId(fixture.id);
       } catch (e) {
         console.error(e);
       } finally {
@@ -28,200 +24,151 @@ export function Policy() {
   }, []);
 
   return (
-    <div className="policy-container slide-in">
-      <div className="policy-header">
-        <div className="policy-header-content">
-          <div className="eyebrow mono">INTERVENTION POLICY</div>
-          <h1 className="title">Bounded by code, not confidence alone.</h1>
-          <p className="description">
-            The model may propose an action. These deterministic rules decide whether anything is allowed to execute. Policy is read-only in this demo.
-          </p>
+    <div className="fade-in">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
+        <PageHeader 
+          title="Guardrails" 
+          description="Bounded by code, not confidence alone. The model proposes, but deterministic rules decide whether anything executes."
+          eyebrow="INTERVENTION POLICY"
+        />
+        <div style={{ marginTop: 'var(--space-4)' }}>
+          <ProvenanceChip type="enforced" label="POLICY v1 · CODE ENFORCED" />
+          <div className="mono text-caption text-muted mt-2">Changes require code review and redeployment.</div>
         </div>
-        <div className="policy-status">
-          <div className="chip provenance-enforced">
+      </div>
+
+      <div className="panel mb-6 fade-in" style={{ padding: 'var(--space-4)' }}>
+        <div className="decision-boundary">
+          <div className="flow-step">
+            <span className="mono">Risk signal</span>
+          </div>
+          <div className="flow-arrow text-muted">→</div>
+          <div className="flow-step advisory text-secondary">
+            <span className="mono">LLM proposal</span>
+          </div>
+          <div className="flow-arrow text-muted">→</div>
+          <div className="flow-step authoritative" style={{ fontWeight: 600, color: 'var(--ink)' }}>
             <Lock size={14} style={{ marginRight: 6 }} />
-            POLICY v1 · CODE ENFORCED
+            <span className="mono">Deterministic policy</span>
           </div>
-          <div className="status-note mono">Changes require code review and redeployment.</div>
+          <div className="flow-arrow text-muted">→</div>
+          <div className="flow-step">
+            <span className="mono">Action / Abstain</span>
+          </div>
+          <div className="flow-arrow text-muted">→</div>
+          <div className="flow-step">
+            <span className="mono">Audit trail</span>
+          </div>
         </div>
       </div>
 
-      <div className="decision-boundary panel">
-        <div className="flow-step">
-          <span className="mono">Risk signal</span>
+      <h2 className="title-section mb-4">Active Guardrails</h2>
+      
+      <div className="policy-grid">
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <ShieldAlert size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Retry allowlist</h3>
+            </div>
+          </div>
+          <div className="mono mb-2">DC_08 only</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> Retries are permitted only for the observed, explicitly allowlisted card-decline code.</p>
+          <p className="text-sm"><strong>Effect:</strong> Unseen error codes cannot trigger a retry.</p>
         </div>
-        <div className="flow-arrow">→</div>
-        <div className="flow-step advisory">
-          <span className="mono">LLM proposal</span>
+
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <AlertTriangle size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Unknown errors</h3>
+            </div>
+          </div>
+          <div className="mono mb-2">ABSTAIN BY DEFAULT</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> The system does not assume an unfamiliar failure is recoverable.</p>
+          <p className="text-sm"><strong>Effect:</strong> No action is taken until a rule is intentionally added in code.</p>
         </div>
-        <div className="flow-arrow">→</div>
-        <div className="flow-step authoritative">
-          <Lock size={14} style={{ marginRight: 6 }} />
-          <span className="mono">Deterministic policy</span>
+
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Scale size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Minimum confidence</h3>
+            </div>
+          </div>
+          <div className="mono mb-2">≥ 0.60</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> Low-confidence model recommendations are not sufficient to act.</p>
+          <p className="text-sm"><strong>Effect:</strong> The proposal is recorded, then rejected.</p>
         </div>
-        <div className="flow-arrow">→</div>
-        <div className="flow-step">
-          <span className="mono">One bounded action or abstention</span>
+
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Clock size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Freshness cooldown</h3>
+            </div>
+          </div>
+          <div className="mono mb-2">60 seconds</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> A customer may still be actively completing checkout.</p>
+          <p className="text-sm"><strong>Effect:</strong> The agent waits rather than racing the customer.</p>
         </div>
-        <div className="flow-arrow">→</div>
-        <div className="flow-step">
-          <span className="mono">Audit trail</span>
+
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Hourglass size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Abandonment threshold</h3>
+            </div>
+          </div>
+          <div className="mono mb-2">10 minutes</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> A payment method must remain incomplete long enough to be considered genuine abandonment.</p>
+          <p className="text-sm"><strong>Effect:</strong> No nudge is considered before this threshold.</p>
         </div>
-      </div>
 
-      <div className="policy-grid-section">
-        <h2>Active guardrails</h2>
-        <div className="policy-grid">
-          
-          <div className="policy-card">
-            <div className="card-header">
-              <ShieldAlert size={18} className="icon-gold" />
-              <h3>Retry allowlist</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Lock size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Maximum actions</h3>
             </div>
-            <div className="card-value mono">DC_08 only</div>
-            <p className="card-why"><strong>Why:</strong> Retries are permitted only for the observed, explicitly allowlisted card-decline code.</p>
-            <p className="card-effect"><strong>Effect:</strong> Unseen error codes cannot trigger a retry.</p>
           </div>
+          <div className="mono mb-2">1 action per session</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> Recovery must not become repeated charging or repeated customer outreach.</p>
+          <p className="text-sm"><strong>Effect:</strong> Every later proposal is blocked.</p>
+        </div>
 
-          <div className="policy-card">
-            <div className="card-header">
-              <AlertTriangle size={18} className="icon-gold" />
-              <h3>Unknown errors</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
+        <div className="policy-card">
+          <div className="card-header mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <Coins size={16} className="text-secondary" />
+              <h3 className="text-label m-0">Amount immutability</h3>
             </div>
-            <div className="card-value mono">ABSTAIN BY DEFAULT</div>
-            <p className="card-why"><strong>Why:</strong> The system does not assume an unfamiliar failure is recoverable.</p>
-            <p className="card-effect"><strong>Effect:</strong> No action is taken until a rule is intentionally added in code.</p>
           </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <Scale size={18} className="icon-gold" />
-              <h3>Minimum confidence</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">≥ 0.60</div>
-            <p className="card-why"><strong>Why:</strong> Low-confidence model recommendations are not sufficient to act.</p>
-            <p className="card-effect"><strong>Effect:</strong> The proposal is recorded, then rejected.</p>
-          </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <Clock size={18} className="icon-gold" />
-              <h3>Freshness cooldown</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">60 seconds</div>
-            <p className="card-why"><strong>Why:</strong> A customer may still be actively completing checkout.</p>
-            <p className="card-effect"><strong>Effect:</strong> The agent waits rather than racing the customer.</p>
-          </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <Hourglass size={18} className="icon-gold" />
-              <h3>Abandonment threshold</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">10 minutes</div>
-            <p className="card-why"><strong>Why:</strong> A payment method must remain incomplete long enough to be considered genuine checkout abandonment.</p>
-            <p className="card-effect"><strong>Effect:</strong> No nudge is considered before this threshold.</p>
-          </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <Lock size={18} className="icon-gold" />
-              <h3>Maximum actions</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">1 action per session</div>
-            <p className="card-why"><strong>Why:</strong> Recovery must not become repeated charging or repeated customer outreach.</p>
-            <p className="card-effect"><strong>Effect:</strong> Every later proposal is blocked.</p>
-          </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <Coins size={18} className="icon-gold" />
-              <h3>Amount immutability</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">ORIGINAL AMOUNT ONLY</div>
-            <p className="card-why"><strong>Why:</strong> The agent is never permitted to discount, increase, split, or alter money.</p>
-            <p className="card-effect"><strong>Effect:</strong> A retry must exactly match the original cart value.</p>
-          </div>
-
-          <div className="policy-card">
-            <div className="card-header">
-              <CheckCircle2 size={18} className="icon-gold" />
-              <h3>Completed-payment exclusion</h3>
-              <span className="chip provenance-enforced">CODE ENFORCED</span>
-            </div>
-            <div className="card-value mono">SUCCEEDED SESSIONS EXCLUDED</div>
-            <p className="card-why"><strong>Why:</strong> A completed payment does not need recovery.</p>
-            <p className="card-effect"><strong>Effect:</strong> The agent never intervenes after success.</p>
-          </div>
-
+          <div className="mono mb-2">ORIGINAL AMOUNT ONLY</div>
+          <p className="text-secondary text-sm mb-1"><strong>Why:</strong> The agent is never permitted to discount, increase, split, or alter money.</p>
+          <p className="text-sm"><strong>Effect:</strong> A retry must exactly match the original cart value.</p>
         </div>
       </div>
 
-      <div className="proof-section panel">
-        <h2>Proof in this batch</h2>
-        <div className="proof-grid">
-          <div className="metric">
-            <div className="metric-label">Abstention Rate</div>
-            <div className="metric-value">
-              {loading ? '—' : metrics ? `${(metrics.abstain_rate * 100).toFixed(1)}%` : '—'}
+      <div style={{ marginTop: 'var(--space-7)' }}>
+        <h2 className="title-section mb-4">Guardrail Efficacy Overview</h2>
+        {!loading && metrics ? (
+          <div className="metric-blocks-grid">
+            <div className="panel">
+              <div className="text-label mb-1">Total Proposals Reviewed</div>
+              <div className="mono" style={{ fontSize: '32px' }}>{metrics.treatment_sessions}</div>
             </div>
-            <div className="metric-sub mono">
-              {loading ? '—' : metrics ? `${metrics.abstentions} sessions` : '—'}
+            <div className="panel">
+              <div className="text-label mb-1">Enforced Abstentions</div>
+              <div className="mono" style={{ fontSize: '32px', color: 'var(--warning)' }}>{metrics.abstentions}</div>
             </div>
-          </div>
-          <div className="metric">
-            <div className="metric-label">False-Positive Cost</div>
-            <div className="metric-value">
-              {loading ? '—' : metrics ? `₹${metrics.false_positive_cost_inr.toFixed(2)}` : '—'}
-            </div>
-          </div>
-          <div className="metric">
-            <div className="metric-label">Treatment Sessions</div>
-            <div className="metric-value">
-              {loading ? '—' : metrics ? metrics.treatment_sessions : '—'}
+            <div className="panel">
+              <div className="text-label mb-1">Permitted Actions</div>
+              <div className="mono" style={{ fontSize: '32px', color: 'var(--ink)' }}>{metrics.interventions_applied}</div>
             </div>
           </div>
-          <div className="metric">
-            <div className="metric-label">Maximum Actions</div>
-            <div className="metric-value">1 action maximum</div>
-            <div className="metric-sub mono">Immutable policy statement</div>
-          </div>
-        </div>
-
-        <div className="fixture-callout">
-          <p>
-            One recorded guardrail abstention is available as a test fixture for the freshness rule.
-          </p>
-          {fixtureId && (
-            <Link to={`/replay/${fixtureId}`} className="btn" style={{ background: 'var(--bg-hover)' }}>
-              View Test Fixture Replay
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <div className="policy-footer">
-        <h3>What policy cannot do</h3>
-        <ul className="cannot-do-list mono">
-          <li>No amount changes</li>
-          <li>No unlimited retries</li>
-          <li>No action on unknown errors</li>
-          <li>No hidden autonomous escalation</li>
-        </ul>
-        <p className="footer-conclusion">
-          The agent proposes. Deterministic code permits or denies. Every outcome is retained in the audit trail.
-        </p>
-        {metrics && (
-          <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--fg-muted)' }}>
-            Data Mode: {metrics.data_mode}
-          </div>
+        ) : (
+          <div className="text-muted fade-in mono">Loading metrics...</div>
         )}
       </div>
     </div>

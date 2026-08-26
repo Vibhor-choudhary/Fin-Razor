@@ -1,6 +1,7 @@
 .tracer-container {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 0;
 }
 
 .tracer-controls {

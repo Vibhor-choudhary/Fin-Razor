@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { api, type Session } from '../lib/api';
+import { useReveal } from '../hooks/useReveal';
 import './ErrorIntelligence.css';
 
 interface ErrorGroup {
@@ -104,8 +105,10 @@ export function ErrorIntelligence() {
   const hasUnknown = groups.some(g => g.policyPosture.includes('Default deny'));
   const selectedGroup = groups.find(g => g.signal === selectedSignal);
 
+  const revealRef = useReveal({ selector: '.reveal-item' });
+
   return (
-    <div className="ei-container slide-up">
+    <div className="ei-container slide-up" ref={revealRef}>
       <div className="header" style={{ marginBottom: '2rem' }}>
         <h1 className="title">Error Intelligence</h1>
         <div className="methodology">

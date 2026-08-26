@@ -1,0 +1,75 @@
+/* KineticText.css */
+
+.kinetic-text-root {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  font-family: 'Geist', var(--font-sans), sans-serif;
+  font-weight: 300;
+  cursor: default;
+  user-select: none;
+  font-optical-sizing: auto;
+  --hover-padding: calc(1em / 16);
+  --text-stroke-width: calc(1em * 140 / 6000);
+  line-height: 0.92;
+}
+
+.kinetic-letter {
+  display: inline-block;
+  font-weight: 300;
+  will-change: font-weight, -webkit-text-stroke-width, padding, transform;
+  -webkit-text-stroke-color: transparent;
+  -webkit-text-stroke-width: var(--text-stroke-width);
+  /* Slow-motion, dense viscous decay when cursor leaves (0.75s) */
+  transition: font-weight 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-text-stroke-color 0.65s ease,
+              -webkit-text-stroke-width 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--ink, #000000);
+  padding: 0 1px;
+}
+
+/* Hover on direct letter -> Heavy peak weight (900), stroke expansion & micro-lift */
+.kinetic-letter:hover {
+  font-weight: 900 !important;
+  padding-inline: var(--hover-padding);
+  -webkit-text-stroke-color: currentColor;
+  -webkit-text-stroke-width: calc(var(--text-stroke-width) * 2.4);
+  transform: translateY(-3px);
+  /* Smooth, deliberate swelling on entry (0.45s) */
+  transition: font-weight 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-text-stroke-color 0.45s ease,
+              -webkit-text-stroke-width 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              padding 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Immediate sibling (+1) -> Soft shoulder weight with micro-delayed trail */
+.kinetic-letter:hover + .kinetic-letter {
+  font-weight: 480 !important;
+  padding-inline: calc(var(--hover-padding) * 0.4);
+  transition: font-weight 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+              padding 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
+}
+
+/* Immediate sibling (-1) -> Soft shoulder weight with micro-delayed trail */
+.kinetic-letter:has(+ .kinetic-letter:hover) {
+  font-weight: 480 !important;
+  padding-inline: calc(var(--hover-padding) * 0.4);
+  transition: font-weight 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+              padding 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

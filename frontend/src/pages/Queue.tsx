@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, type Session } from '../lib/api';
+import { PageHeader } from '../components/PageHeader';
+import { ProvenanceChip } from '../components/ProvenanceChip';
+import { EvidenceDrawer } from '../components/EvidenceDrawer';
+import { useReveal } from '../hooks/useReveal';
 
 export function Queue() {
   const [sessions, setSessions] = useState<Session[]>([]);
@@ -11,6 +15,9 @@ export function Queue() {
   const [status, setStatus] = useState('');
   const [atRisk, setAtRisk] = useState('');
   const [intType, setIntType] = useState('');
+
+  // Drawer
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -37,30 +44,44 @@ export function Queue() {
     load();
   }, [status, atRisk, intType]);
 
+  const selectedSession = sessions.find(s => s.id === selectedSessionId);
+
+  const renderProvenance = (s: Session) => {
+    if (s.final_status === 'succeeded') {
+      return <ProvenanceChip type="verified" label="RECOVERED" />;
+    } else if (s.intervention_status === 'abstained' || s.intervention_status === 'rejected') {
+      return <ProvenanceChip type="abstained" label="ABSTAINED" />;
+    } else {
+      return <ProvenanceChip type="danger" label="FAILED" />;
+    }
+  };
+
+  const revealRef = useReveal({ selector: '.reveal-item' });
+
   return (
-    <div>
-      <div className="header">
-        <h1 className="title">Recovery Queue</h1>
-        <div className="methodology" style={{ marginBottom: 0, padding: '0.5rem 1rem' }}>
-          Sandbox simulation — real Hyperswitch payment rails; simulated customer outcomes.
-        </div>
+    <div className="fade-in" ref={revealRef}>
+      <div className="reveal-item">
+        <PageHeader 
+          title="Recovery Queue"
+          description="Filter and inspect at-risk checkout sessions and their programmatic outcomes."
+        />
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-        <select value={status} onChange={e => setStatus(e.target.value)} className="btn">
+      <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-6)', flexWrap: 'wrap' }}>
+        <select value={status} onChange={e => setStatus(e.target.value)} className="btn btn-secondary">
           <option value="">All Statuses</option>
           <option value="succeeded">Succeeded</option>
           <option value="failed">Failed</option>
           <option value="requires_payment_method">Requires Payment Method</option>
         </select>
         
-        <select value={atRisk} onChange={e => setAtRisk(e.target.value)} className="btn">
+        <select value={atRisk} onChange={e => setAtRisk(e.target.value)} className="btn btn-secondary">
           <option value="">All Risk Levels</option>
           <option value="true">At Risk Only</option>
           <option value="false">Safe Only</option>
         </select>
 
-        <select value={intType} onChange={e => setIntType(e.target.value)} className="btn">
+        <select value={intType} onChange={e => setIntType(e.target.value)} className="btn btn-secondary">
           <option value="">All Interventions</option>
           <option value="retry">Retry</option>
           <option value="nudge">Nudge</option>
@@ -68,72 +89,50 @@ export function Queue() {
         </select>
       </div>
 
-      {error && <div className="error-state">Error: {error}</div>}
+      {error && <div className="text-danger fade-in" style={{ marginBottom: 'var(--space-4)' }}>Error: {error}</div>}
       
       <div className="panel" style={{ padding: 0 }}>
         <div className="table-wrap">
-          <table style={{ opacity: loading ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+          <table style={{ opacity: loading ? 0.5 : 1, transition: 'opacity var(--transition-fast)' }}>
             <thead>
               <tr>
                 <th>Session ID</th>
                 <th>Cart Value</th>
-                <th>Latest Error / Status</th>
-                <th>Agent Recommendation</th>
-                <th>Guardrail Outcome</th>
-                <th>Final Result</th>
-                <th>Confidence</th>
+                <th>Failure Reason</th>
+                <th>Agent Proposal</th>
+                <th>Outcome</th>
                 <th>Time</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
               {sessions.map(s => {
-                let rec = s.intervention_type || '-';
-                let outcome = s.intervention_status || '-';
-                
-                // Distinguish state visually
-                let outcomeColor = 'var(--fg)';
-                if (outcome === 'abstained' || outcome === 'rejected') outcomeColor = 'var(--warning)';
-                if (outcome === 'failed') outcomeColor = 'var(--error)';
-                if (outcome === 'succeeded') outcomeColor = 'var(--accent)';
-
-                let finalResultText = s.final_status;
-                if (rec === 'retry') {
-                  if (s.final_status === 'succeeded') finalResultText = 'RECOVERED';
-                  else if (s.final_status === 'failed') finalResultText = 'RETRY FAILED';
-                }
-
+                const rec = s.intervention_type || '-';
                 return (
-                  <tr key={s.id}>
-                    <td className="mono">
-                      {s.id.startsWith('demo_') ? s.id : `${s.id.slice(0, 13)}...`}
-                      {s.id.startsWith('demo_') ? (
-                        <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>SIMULATED DEMO DATA</div>
-                      ) : s.id.includes('guardrail_test') ? (
-                        <div style={{fontSize: '0.65rem', color: 'var(--warning)', marginTop: 4}}>TEST FIXTURE · FRESHNESS RULE</div>
-                      ) : null}
-                    </td>
-                    <td>₹{s.cart_value}</td>
+                  <tr 
+                    key={s.id} 
+                    onClick={() => setSelectedSessionId(s.id)} 
+                    style={{ cursor: 'pointer' }}
+                    tabIndex={0}
+                    onKeyDown={e => { if (e.key === 'Enter') setSelectedSessionId(s.id); }}
+                  >
                     <td>
-                      <span className="mono" style={{ fontSize: '0.75rem' }}>
+                      <div className="mono" style={{ color: 'var(--text-primary)' }}>
+                        {s.id.startsWith('demo_') ? s.id : `${s.id.slice(0, 13)}...`}
+                      </div>
+                      {s.id.startsWith('demo_') && (
+                        <div className="text-caption" style={{ color: 'var(--simulated)', marginTop: '2px' }}>SIMULATED DEMO DATA</div>
+                      )}
+                    </td>
+                    <td className="mono">₹{s.cart_value}</td>
+                    <td>
+                      <span className="mono text-secondary">
                         {s.latest_error_code || s.initial_status}
                       </span>
                     </td>
-                    <td><span className="chip">{rec}</span></td>
-                    <td style={{ color: outcomeColor }}>{outcome}</td>
-                    <td>
-                      <span className={`chip ${s.final_status === 'succeeded' ? 'success' : s.final_status === 'failed' ? 'error' : ''}`}>
-                        {finalResultText}
-                      </span>
-                    </td>
-                    <td className="mono">
-                      {s.confidence !== null && s.confidence !== undefined ? s.confidence.toFixed(2) : '-'}
-                    </td>
-                    <td className="mono" style={{ fontSize: '0.75rem', color: 'var(--fg-muted)' }}>
+                    <td className="mono text-muted">{rec}</td>
+                    <td>{renderProvenance(s)}</td>
+                    <td className="mono text-caption text-muted">
                       {new Date(s.created_at).toLocaleTimeString()}
-                    </td>
-                    <td>
-                      <Link to={`/sessions/${s.id}`} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>View</Link>
                     </td>
                   </tr>
                 );
@@ -141,8 +140,51 @@ export function Queue() {
             </tbody>
           </table>
         </div>
-        {sessions.length === 0 && !loading && <div style={{ padding: '2rem' }} className="mono">No sessions found.</div>}
+        {sessions.length === 0 && !loading && (
+          <div className="text-muted" style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
+            No sessions match the selected criteria.
+          </div>
+        )}
       </div>
+
+      <EvidenceDrawer 
+        isOpen={!!selectedSessionId} 
+        onClose={() => setSelectedSessionId(null)}
+        title="Session Evidence"
+        sessionId={selectedSession?.id}
+      >
+        {selectedSession && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+            <div>
+              <div className="text-label" style={{ marginBottom: 'var(--space-1)' }}>Outcome</div>
+              {renderProvenance(selectedSession)}
+            </div>
+
+            <div>
+              <div className="text-label" style={{ marginBottom: 'var(--space-1)' }}>Agent Proposal</div>
+              <div className="mono">{selectedSession.intervention_type || 'None'}</div>
+            </div>
+
+            <div>
+              <div className="text-label" style={{ marginBottom: 'var(--space-1)' }}>Guardrail Verdict</div>
+              <div className="mono text-secondary">{selectedSession.intervention_status || 'None'}</div>
+            </div>
+
+            <div style={{ paddingTop: 'var(--space-4)', borderTop: '1px solid var(--divider)' }}>
+              <Link to={`/replay/${selectedSession.id}`} className="btn btn-primary" style={{ width: '100%' }}>
+                Open in Replay
+              </Link>
+            </div>
+            
+            <div style={{ paddingTop: 'var(--space-4)', borderTop: '1px solid var(--divider)' }}>
+              <div className="text-label" style={{ marginBottom: 'var(--space-3)' }}>Raw Payload (Summary)</div>
+              <pre className="mono" style={{ fontSize: '11px', background: 'var(--canvas)', padding: 'var(--space-3)', borderRadius: 'var(--radius-input)', overflowX: 'auto', color: 'var(--text-secondary)' }}>
+                {JSON.stringify(selectedSession, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
+      </EvidenceDrawer>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
 import { api, type Session } from '../lib/api';
-import { Link } from 'react-router-dom';
+import { PageHeader } from '../components/PageHeader';
+import { ProvenanceChip } from '../components/ProvenanceChip';
+import { useReveal } from '../hooks/useReveal';
 import './Ledger.css';
 
 interface LedgerEntry {
@@ -19,17 +21,12 @@ interface LedgerEntry {
 export function Ledger() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dataMode, setDataMode] = useState('sandbox_simulation');
 
   useEffect(() => {
     async function load() {
       try {
-        const [sRes, mRes] = await Promise.all([
-          api.getAllSessions(),
-          api.getMetrics()
-        ]);
+        const sRes = await api.getAllSessions();
         setSessions(sRes);
-        setDataMode(mRes.data_mode);
       } catch (e) {
         console.error(e);
       } finally {
@@ -46,8 +43,6 @@ export function Ledger() {
     let runningVerified = 0;
     let runningSimulated = 0;
     
-    // Sort chronologically if created_at exists, else assume list is roughly chronological or just map as is.
-    // The endpoint returns newest first, so we reverse to build running totals accurately.
     const sorted = [...sessions].reverse();
 
     sorted.forEach(s => {
@@ -87,7 +82,7 @@ export function Ledger() {
           action: s.intervention_type.toUpperCase(),
           amount: s.cart_value,
           outcome: s.intervention_status ? s.intervention_status.toUpperCase() : 'UNKNOWN',
-          provenance: s.intervention_type === 'abstain' ? 'GUARDRAIL ABSTAINED' : 'UNRECOVERED'
+          provenance: s.intervention_type === 'abstain' || s.intervention_status === 'rejected' ? 'GUARDRAIL ABSTAINED' : 'UNRECOVERED'
         });
       }
     });
@@ -95,116 +90,114 @@ export function Ledger() {
     return { moneyEntries: money, noRecoveryEntries: noMoney };
   }, [sessions]);
 
-  if (loading) return <div className="loader">Loading ledger...</div>;
+  const revealRef = useReveal({ selector: '.reveal-item' });
+
+  if (loading) return <div className="mono text-muted py-4 fade-in">Loading ledger...</div>;
 
   return (
-    <div className="ledger-container slide-up">
-      <div className="header" style={{ marginBottom: '2rem' }}>
-        <h1 className="title">Recovery Ledger</h1>
-        <div className="methodology" style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div>HISTORICAL REPLAY · READ ONLY</div>
-          <div className="chip sandbox">Data Mode: {dataMode}</div>
-        </div>
-      </div>
+    <div className="fade-in" ref={revealRef}>
+      <PageHeader 
+        title="Outcomes" 
+        description="A financial ledger separating deterministically verified recovery from statistically simulated recovery."
+        eyebrow="RECOVERY LEDGER"
+      />
 
-      <div className="ledger-totals panel" style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <div>
-          <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginBottom: '0.25rem' }}>VERIFIED SANDBOX RETRY RECOVERY</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)' }}>
-            ₹{moneyEntries.length > 0 ? moneyEntries[0].runningVerified.toFixed(2) : '0.00'}
-          </div>
-        </div>
-        <div>
-          <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginBottom: '0.25rem' }}>SIMULATED NUDGE RECOVERY</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--simulated)' }}>
-            ₹{moneyEntries.length > 0 ? moneyEntries[0].runningSimulated.toFixed(2) : '0.00'}
-          </div>
-        </div>
-        <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: '2rem' }}>
-          <div className="mono" style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', marginBottom: '0.25rem' }}>TOTAL MODELED RECOVERY</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-            ₹{moneyEntries.length > 0 ? moneyEntries[0].runningTotal.toFixed(2) : '0.00'}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--fg-muted)', marginTop: '0.25rem' }}>NOT SETTLED/LIVE MONEY</div>
-        </div>
-      </div>
-
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>Modeled Revenue Entries</h2>
-      <div className="panel" style={{ padding: 0, marginBottom: '3rem', overflowX: 'auto' }}>
-        {moneyEntries.length === 0 ? (
-          <div style={{ padding: '2rem' }}>No recovery recorded yet.</div>
-        ) : (
-          <table className="ledger-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Session ID</th>
-                <th>Action</th>
-                <th>Provenance</th>
-                <th style={{ textAlign: 'right' }}>Amount</th>
-                <th style={{ textAlign: 'right' }}>Running Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {moneyEntries.map((e, i) => (
-                <tr key={`${e.id}-${i}`}>
-                  <td className="mono" style={{ color: 'var(--fg-muted)' }}>{e.timestamp}</td>
-                  <td className="mono">
-                    <Link to={`/replay/${e.id}`} style={{ color: 'var(--fg)', textDecoration: 'underline' }}>{e.id}</Link>
-                  </td>
-                  <td>{e.action}</td>
-                  <td>
-                    <span className={`chip ${e.type === 'verified' ? 'provenance-verified' : 'provenance-simulated'}`}>
-                      {e.provenance}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold', color: e.type === 'verified' ? 'var(--accent)' : 'var(--simulated)' }}>
-                    +₹{e.amount.toFixed(2)}
-                  </td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                    ₹{e.runningTotal.toFixed(2)}
-                  </td>
+      <div style={{ marginTop: 'var(--space-6)' }}>
+        <h2 className="title-section mb-4">Successful Recoveries</h2>
+        <div className="panel" style={{ padding: 0 }}>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Session ID</th>
+                  <th>Action</th>
+                  <th>Outcome Type</th>
+                  <th style={{ textAlign: 'right' }}>Amount</th>
+                  <th style={{ textAlign: 'right' }}>Running Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {moneyEntries.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-muted text-center py-4 mono">No successful recoveries found.</td>
+                  </tr>
+                ) : (
+                  moneyEntries.map(entry => {
+                    const isDemo = entry.id.startsWith('demo_');
+                    return (
+                      <tr key={entry.id}>
+                        <td className="mono text-caption text-muted">{entry.timestamp}</td>
+                        <td>
+                          <div className="mono">{isDemo ? entry.id : `${entry.id.slice(0,13)}...`}</div>
+                          {isDemo && <div className="text-caption" style={{ color: 'var(--simulated)', marginTop: '2px' }}>SIMULATED DEMO DATA</div>}
+                        </td>
+                        <td className="mono">{entry.action}</td>
+                        <td>
+                          {entry.type === 'verified' ? (
+                            <ProvenanceChip type="verified" label={entry.provenance} />
+                          ) : (
+                            <ProvenanceChip type="simulated" label={entry.provenance} />
+                          )}
+                        </td>
+                        <td className="mono text-success" style={{ textAlign: 'right' }}>+ ₹{entry.amount.toLocaleString()}</td>
+                        <td className="mono" style={{ textAlign: 'right', fontWeight: 600 }}>₹{entry.runningTotal.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: 'var(--fg-muted)' }}>No Recovery Recorded</h2>
-      <div className="panel" style={{ padding: 0, overflowX: 'auto' }}>
-        {noRecoveryEntries.length === 0 ? (
-          <div style={{ padding: '2rem' }}>No failed or abstained actions.</div>
-        ) : (
-          <table className="ledger-table">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Session ID</th>
-                <th>Action</th>
-                <th>Outcome</th>
-                <th style={{ textAlign: 'right' }}>Cart Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {noRecoveryEntries.map((e, i) => (
-                <tr key={`${e.id}-${i}`} style={{ opacity: 0.7 }}>
-                  <td className="mono" style={{ color: 'var(--fg-muted)' }}>{e.timestamp}</td>
-                  <td className="mono">
-                    <Link to={`/replay/${e.id}`} style={{ color: 'var(--fg)', textDecoration: 'underline' }}>{e.id}</Link>
-                  </td>
-                  <td>{e.action}</td>
-                  <td>
-                    <span className="chip provenance-abstained">{e.provenance}</span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    ₹{e.amount.toFixed(2)}
-                  </td>
+      <div style={{ marginTop: 'var(--space-7)' }}>
+        <h2 className="title-section mb-4">Unrecovered & Abstained</h2>
+        <div className="panel" style={{ padding: 0 }}>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Session ID</th>
+                  <th>Action</th>
+                  <th>Outcome Type</th>
+                  <th style={{ textAlign: 'right' }}>Amount</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {noRecoveryEntries.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-muted text-center py-4 mono">No unrecovered sessions found.</td>
+                  </tr>
+                ) : (
+                  noRecoveryEntries.slice(0, 50).map((entry, idx) => {
+                    const isDemo = entry.id.startsWith('demo_');
+                    return (
+                      <tr key={`${entry.id}-${idx}`}>
+                        <td className="mono text-caption text-muted">{entry.timestamp}</td>
+                        <td>
+                          <div className="mono">{isDemo ? entry.id : `${entry.id.slice(0,13)}...`}</div>
+                          {isDemo && <div className="text-caption" style={{ color: 'var(--simulated)', marginTop: '2px' }}>SIMULATED DEMO DATA</div>}
+                        </td>
+                        <td className="mono text-muted">{entry.action}</td>
+                        <td>
+                          {entry.provenance === 'GUARDRAIL ABSTAINED' ? (
+                            <ProvenanceChip type="abstained" label={entry.provenance} />
+                          ) : (
+                            <ProvenanceChip type="danger" label={entry.provenance} />
+                          )}
+                        </td>
+                        <td className="mono text-muted" style={{ textAlign: 'right' }}>₹{entry.amount.toLocaleString()}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );

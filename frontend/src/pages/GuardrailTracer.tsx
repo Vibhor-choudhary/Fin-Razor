@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, type Session, type SessionDetailResponse } from '../lib/api';
 import { Link } from 'react-router-dom';
+import { useReveal } from '../hooks/useReveal';
 import './GuardrailTracer.css';
 import { CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 
@@ -45,6 +46,8 @@ export function GuardrailTracer() {
     }
     loadDetail();
   }, [selectedId]);
+
+  const revealRef = useReveal({ selector: '.reveal-item' });
 
   if (loadingList) return <div className="loader">Loading tracer...</div>;
   if (sessions.length === 0) {
@@ -154,7 +157,7 @@ export function GuardrailTracer() {
   }
 
   return (
-    <div className="tracer-container slide-up">
+    <div className="tracer-container slide-up" ref={revealRef}>
       <div className="header" style={{ marginBottom: '2rem' }}>
         <h1 className="title">Guardrail Stress Test Tracer</h1>
         <div className="methodology">
