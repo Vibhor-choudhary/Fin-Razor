@@ -1,7 +1,7 @@
-# Checkout Recovery Agent
-## A guardrailed AI system for recovering checkout revenue safely
+# REVORA — Checkout Recovery Agent
+## Revenue recovery, safely decided.
 
-This project provides a lightweight, AI-powered Checkout Recovery Agent designed to identify at-risk checkout sessions and intervene safely before the user abandons their cart. Built specifically for the Razorpay AI Buildathon, it bridges the gap between passive analytics and active, guardrailed revenue recovery using the Upsonic agent framework and Hyperswitch.
+A guardrailed AI system for recovering checkout revenue safely without blind retries. Built with deterministic policy bounds, real Hyperswitch sandbox execution, and immutable evidence ledgers.
 
 ### Problem
 Merchants lose significant revenue when users abandon checkout at the payment step—often due to preventable friction like payment failures, confusing errors, or slow UI. While analytics can show where drop-offs happen, merchants lack the tooling to safely and automatically intervene (e.g., offering a retry or alternate payment method) in real time without risking overcharging or annoying the customer.
