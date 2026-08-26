@@ -22,8 +22,7 @@ __pycache__/
 coverage/
 .coverage
 
-# Large media & generated frames
+# Raw video & root folders (preserve frontend/public/frames)
 *.mp4
 *.mov
-frames/
-frontend/public/frames/
+/frames/
