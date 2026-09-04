@@ -26,3 +26,4 @@ coverage/
 *.mp4
 *.mov
 /frames/
+!UI.mp4
