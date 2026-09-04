@@ -6,9 +6,11 @@ Revora is a guardrailed AI system designed to safely recover checkout revenue wi
 
 Watch Revora in action:
 
-<video src="UI.mp4" controls="controls" style="max-width: 100%;">
-  Your browser does not support the video tag.
-</video>
+
+
+https://github.com/user-attachments/assets/e60e0b6f-0948-4d5b-aea7-87b702daeeef
+
+
 
 *(If the video does not load, you can download or view it directly [here](UI.mp4))*
 
